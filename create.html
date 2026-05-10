@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Mixtape — MEDUSA'S MIXTAPES</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <style>
+    .page-header { text-align: center; padding: 40px 20px 20px; }
+    .page-header p { font-size: 1rem; color: var(--tape-brown); font-style: italic; margin-top: 8px; opacity: 0.8; }
+
+    .create-card {
+      background: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 28px;
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 27px,
+        rgba(200,16,46,0.035) 27px, rgba(200,16,46,0.035) 28px
+      );
+    }
+
+    .field-label { display: block; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; font-style: italic; }
+    .field-group { margin-bottom: 22px; }
+
+    /* Live cassette label preview */
+    .cassette-label-preview {
+      background: var(--red);
+      border: 3px solid var(--black);
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+      background-image: repeating-linear-gradient(
+        45deg, transparent, transparent 8px,
+        rgba(0,0,0,0.04) 8px, rgba(0,0,0,0.04) 9px
+      );
+    }
+    .cassette-label-preview::after {
+      content: '♪ ♫ ♪';
+      position: absolute; bottom: 6px; right: 12px;
+      font-size: 1rem; opacity: 0.2; letter-spacing: 4px;
+    }
+    .lbl-sub { font-size: 0.72rem; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 6px; font-style: normal; }
+    .label-name-live { font-family: 'Permanent Marker', cursive; font-size: 1.5rem; color: var(--yellow); text-shadow: 1px 1px 0 rgba(0,0,0,0.3); word-break: break-word; display: block; }
+
+    /* Note textarea */
+    .note-textarea {
+      width: 100%;
+      padding: 14px 18px;
+      border: 3px solid var(--black);
+      border-radius: 12px;
+      font-family: 'Permanent Marker', cursive;
+      font-size: 1rem;
+      line-height: 1.8;
+      resize: vertical;
+      min-height: 90px;
+      background: #FFF9E6;
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 27px,
+        #e0d5b0 27px, #e0d5b0 28px
+      );
+      box-shadow: var(--shadow);
+      outline: none;
+    }
+    .note-textarea:focus { box-shadow: var(--shadow-lg); }
+    .note-textarea::placeholder { font-family: 'Noto Serif', serif; font-style: italic; font-size: 0.9rem; color: #bbb; }
+
+    /* Song preview list */
+    #song-list-preview { list-style: none; margin-top: 8px; }
+    #song-list-preview li {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px; border: 2px solid #e8dfc0;
+      border-radius: 10px; margin-bottom: 8px; background: #fdf8ed;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    #song-list-preview li:hover { transform: translateX(4px); border-color: var(--black); }
+    #song-list-preview li img { width: 44px; height: 44px; border-radius: 6px; border: 2px solid #ccc; object-fit: cover; }
+    .prev-info { flex: 1; min-width: 0; }
+    .prev-name { font-weight: 700; font-size: 0.9rem; }
+    .prev-artist { font-size: 0.78rem; color: #776; font-style: italic; }
+    .track-bubble { width: 24px; height: 24px; background: var(--black); color: var(--yellow); border-radius: 50%; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .remove-song-btn { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 50%; color: #bbb; transition: color 0.2s, background 0.2s; }
+    .remove-song-btn:hover { color: var(--red); background: #ffe5e5; }
+
+    .form-error { display: none; background: #ffe5e5; border: 2px solid var(--red); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-weight: 700; color: var(--red); font-style: italic; }
+
+    #save-btn { width: 100%; font-size: 1.1rem; padding: 18px; }
+
+    /* Success panel */
+    .success-panel {
+      display: none; background: var(--white); border: 3px solid var(--black);
+      border-radius: 20px; padding: 40px 32px; text-align: center;
+      box-shadow: var(--shadow-lg);
+      animation: popIn 0.45s cubic-bezier(0.175,0.885,0.32,1.275);
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 27px,
+        rgba(200,16,46,0.03) 27px, rgba(200,16,46,0.03) 28px
+      );
+    }
+    @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .success-big-emoji { font-size: 4rem; display: block; margin-bottom: 12px; animation: bounceY 1.2s ease infinite; }
+    @keyframes bounceY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    .success-panel h2 { font-size: 2.8rem; margin-bottom: 8px; }
+    .success-panel > p { font-weight: 600; font-style: italic; color: #554; margin-bottom: 20px; }
+
+    .share-link-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+    #share-url-out { flex: 1; min-width: 180px; max-width: 380px; font-family: monospace; font-size: 0.85rem; padding: 12px 14px; border: 3px solid var(--black); border-radius: 12px; background: #f4ead5; color: #333; }
+    .success-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="index.html">MEDUSA'S <span>MIXTAPES</span></a>
+  <ul class="nav-links">
+    <li><a href="library.html">Search</a></li>
+    <li><a href="create.html">Create</a></li>
+  </ul>
+</nav>
+
+<header class="page-header">
+  <h2>Build Your Tape</h2>
+  <p>Name your playlist, add a note, then save to get your shareable link</p>
+</header>
+
+<div class="container" style="max-width:680px; padding-top:0;">
+
+  <!-- CREATE FORM -->
+  <div class="create-card" id="create-form">
+
+    <!-- Live label preview -->
+    <div class="cassette-label-preview">
+      <p class="lbl-sub">Now Playing</p>
+      <span class="label-name-live" id="label-live">My Awesome Mixtape</span>
+    </div>
+
+    <!-- Name -->
+    <div class="field-group">
+      <label class="field-label" for="playlist-name">Tape Name</label>
+      <input type="text" id="playlist-name" class="input-field" placeholder="e.g. Late Night Drive Vol. 3" maxlength="60" style="border-radius:12px;"/>
+    </div>
+
+    <!-- Personal Note -->
+    <div class="field-group">
+      <label class="field-label" for="playlist-note">A Note to Your Listener <span style="font-style:normal;opacity:0.5;font-size:0.8rem;">(optional)</span></label>
+      <textarea id="playlist-note" class="note-textarea" placeholder="Write a little message to whoever receives this tape…" maxlength="280"></textarea>
+    </div>
+
+    <!-- Songs -->
+    <div class="field-group">
+      <label class="field-label">Your Songs &nbsp;<span class="badge" id="song-count-badge">0</span></label>
+      <div id="no-songs-msg" style="text-align:center;padding:24px;opacity:0.55;font-style:italic;">
+        No songs yet — <a href="library.html" style="color:var(--red);">search for some →</a>
+      </div>
+      <ul id="song-list-preview"></ul>
+    </div>
+
+    <hr class="divider"/>
+    <div class="form-error" id="form-error"></div>
+    <button class="btn btn-red btn-lg" id="save-btn">Save &amp; Get Link</button>
+  </div>
+
+  <!-- SUCCESS PANEL -->
+  <div class="success-panel" id="success-panel">
+    <span class="success-big-emoji">🎉</span>
+    <h2>Tape is Ready!</h2>
+    <p>Your mixtape is live. Share this link with anyone:</p>
+    <div class="share-link-row">
+      <input type="text" id="share-url-out" readonly/>
+      <button class="btn btn-black" onclick="doCopyLink()">Copy</button>
+    </div>
+    <div class="success-actions">
+      <a id="view-tape-link" href="#" class="btn btn-red btn-lg">View My Tape</a>
+      <a href="library.html" class="btn btn-black">Make Another</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="firebase-db.js"></script>
+
+<script>
+  let basket = JSON.parse(localStorage.getItem('mixtape_basket') || '[]');
+
+  renderPreview();
+
+  // Live label preview
+  document.getElementById('playlist-name').addEventListener('input', function() {
+    document.getElementById('label-live').textContent = this.value.trim() || 'My Awesome Mixtape';
+  });
+
+  // Save button
+  document.getElementById('save-btn').addEventListener('click', handleSave);
+
+  function renderPreview() {
+    const list  = document.getElementById('song-list-preview');
+    const noMsg = document.getElementById('no-songs-msg');
+    const badge = document.getElementById('song-count-badge');
+    badge.textContent = basket.length;
+    noMsg.style.display = basket.length === 0 ? 'block' : 'none';
+    list.innerHTML = '';
+    basket.forEach((song, idx) => {
+      const li = document.createElement('li');
+      const bubble = document.createElement('span'); bubble.className = 'track-bubble'; bubble.textContent = idx + 1;
+      const img = document.createElement('img'); img.src = song.image || ''; img.alt = song.album || ''; img.onerror = () => { img.style.display='none'; };
+      const info = document.createElement('div'); info.className = 'prev-info';
+      info.innerHTML = `<div class="prev-name">${song.name}</div><div class="prev-artist">${song.artist}</div>`;
+      const rmBtn = document.createElement('button'); rmBtn.className = 'remove-song-btn'; rmBtn.textContent = '✕'; rmBtn.title = 'Remove';
+      rmBtn.addEventListener('click', () => { basket = basket.filter(s => s.id !== song.id); localStorage.setItem('mixtape_basket', JSON.stringify(basket)); renderPreview(); });
+      li.append(bubble, img, info, rmBtn);
+      list.appendChild(li);
+    });
+  }
+
+  async function handleSave() {
+    const nameEl  = document.getElementById('playlist-name');
+    const noteEl  = document.getElementById('playlist-note');
+    const saveBtn = document.getElementById('save-btn');
+    const errEl   = document.getElementById('form-error');
+    errEl.style.display = 'none';
+
+    const name = nameEl.value.trim();
+    const note = noteEl.value.trim();
+
+    if (!name) { showFormError('Give your mixtape a name first!'); nameEl.focus(); return; }
+    if (basket.length === 0) { showFormError('Add at least one song before saving.'); return; }
+
+    initFirebase();
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner"></span> Saving your tape…';
+
+    try {
+      // Pass name, songs, and optional note to Firestore
+      const docId = await savePlaylist(name, basket, note);
+      const pageBase = window.location.href.replace(/create\.html.*$/, '');
+      const shareUrl = `${pageBase}mixtape.html?id=${docId}`;
+
+      document.getElementById('share-url-out').value = shareUrl;
+      document.getElementById('view-tape-link').href  = shareUrl;
+      document.getElementById('create-form').style.display   = 'none';
+      document.getElementById('success-panel').style.display = 'block';
+
+      localStorage.removeItem('mixtape_basket');
+      basket = [];
+    } catch (err) {
+      console.error(err);
+      showFormError(`Save failed: ${err.message} — check config.js`);
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = 'Save &amp; Get Link';
+    }
+  }
+
+  function showFormError(msg) {
+    const el = document.getElementById('form-error');
+    el.textContent = msg; el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  async function doCopyLink() {
+    const url = document.getElementById('share-url-out').value;
+    try { await navigator.clipboard.writeText(url); } catch { document.getElementById('share-url-out').select(); document.execCommand('copy'); }
+    showToast('Link copied!');
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>

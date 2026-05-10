@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mixtape — MEDUSA'S MIXTAPES</title>
+  <link rel="stylesheet" href="style.css"/>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <style>
+    /* ============================================
+       MIXTAPE VIEW — Full Page Styles
+       ============================================ */
+
+    body {
+      /* Darker, moodier vintage green for this page */
+      background-color: #96C045;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E"),
+        repeating-linear-gradient(
+          -45deg,
+          transparent, transparent 32px,
+          rgba(0,0,0,0.015) 32px, rgba(0,0,0,0.015) 33px
+        );
+      padding-bottom: 120px;
+    }
+
+    /* ---- Floating music notes animation ---- */
+    .music-notes-field {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .note {
+      position: absolute;
+      font-size: 1.4rem;
+      opacity: 0;
+      animation: floatNote linear infinite;
+      user-select: none;
+    }
+
+    @keyframes floatNote {
+      0%   { opacity: 0; transform: translateY(0) rotate(0deg) scale(0.7); }
+      10%  { opacity: 0.5; }
+      80%  { opacity: 0.3; }
+      100% { opacity: 0; transform: translateY(-100vh) rotate(360deg) scale(1.1); }
+    }
+
+    /* ---- Main layout ---- */
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+
+    /* ---- Tape Hero ---- */
+    .tape-hero {
+      background: var(--tape-brown);
+      border-radius: 20px;
+      border: 3px solid #111;
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.4);
+      padding: 36px 28px 28px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      /* Woodgrain texture */
+      background-image:
+        repeating-linear-gradient(
+          88deg,
+          transparent, transparent 40px,
+          rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px
+        ),
+        repeating-linear-gradient(
+          2deg,
+          transparent, transparent 80px,
+          rgba(0,0,0,0.04) 80px, rgba(0,0,0,0.04) 81px
+        );
+      background-color: var(--tape-brown);
+    }
+
+    /* Spinning vinyl record behind everything */
+    .vinyl-bg {
+      position: absolute;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(
+        #1c1c1c 0deg 8deg,
+        #242424 8deg 16deg
+      );
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.12;
+      animation: vinylSpin 25s linear infinite;
+    }
+    @keyframes vinylSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    .tape-hero > * { position: relative; z-index: 1; }
+
+    /* ---- LARGE CASSETTE SVG ---- */
+    .cassette-large {
+      display: block;
+      margin: 0 auto 20px;
+      animation: cassetteFloat 5s ease-in-out infinite;
+      filter: drop-shadow(6px 8px 2px rgba(0,0,0,0.5));
+    }
+    @keyframes cassetteFloat {
+      0%,100% { transform: translateY(0) rotate(-1.5deg); }
+      50%      { transform: translateY(-16px) rotate(1.5deg); }
+    }
+
+    /* Reel spin when playing */
+    .cassette-large.playing .reel-left  { animation: reelSpin 1.2s linear infinite; transform-origin: 108px 172px; }
+    .cassette-large.playing .reel-right { animation: reelSpin 1.2s linear infinite; transform-origin: 252px 172px; }
+    @keyframes reelSpin { to { transform: rotate(360deg); } }
+
+    /* ---- Playlist name ---- */
+    .tape-title {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      color: var(--yellow);
+      letter-spacing: 3px;
+      text-shadow: 3px 3px 0 var(--red);
+      -webkit-text-stroke: 1px rgba(0,0,0,0.5);
+      line-height: 1;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .tape-meta {
+      color: rgba(245,237,208,0.65);
+      font-size: 0.85rem;
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+
+    .tape-stats {
+      display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;
+    }
+    .stat-pill {
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 50px;
+      padding: 6px 18px;
+      color: var(--cream);
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+    .stat-pill strong {
+      color: var(--yellow);
+      font-style: normal;
+      font-family: 'Bangers', cursive;
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
+
+    /* ---- Personal Note card ---- */
+    .note-card {
+      background: #FFF9E6;
+      border: 2.5px solid var(--black);
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin-bottom: 16px;
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+      position: relative;
+      /* lined notebook paper */
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 27px,
+        #e0d5b0 27px, #e0d5b0 28px
+      );
+      background-attachment: local;
+    }
+    /* Red left margin line */
+    .note-card::before {
+      content: '';
+      position: absolute;
+      left: 48px; top: 0; bottom: 0;
+      width: 2px;
+      background: rgba(200,16,46,0.35);
+    }
+    .note-label {
+      font-family: 'Bangers', cursive;
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      color: var(--red);
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+      margin-bottom: 8px;
+      padding-left: 36px;
+    }
+    .note-text {
+      font-family: 'Permanent Marker', cursive;
+      font-size: 1.05rem;
+      color: #2a1a08;
+      line-height: 1.9;
+      padding-left: 36px;
+      min-height: 32px;
+      white-space: pre-wrap;
+    }
+    .note-text.empty {
+      font-family: 'Noto Serif', serif;
+      font-style: italic;
+      color: #bbb;
+      font-size: 0.9rem;
+    }
+
+    /* ---- Action buttons ---- */
+    .tape-actions {
+      display: flex; justify-content: center; gap: 12px;
+      margin: 20px 0 28px; flex-wrap: wrap;
+    }
+
+    /* ---- Track list section ---- */
+    .section-heading {
+      font-family: 'Bangers', cursive;
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      color: var(--black);
+      text-shadow: 2px 2px 0 var(--red);
+      margin-bottom: 18px;
+    }
+
+    /* ---- Track row ---- */
+    .track-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--white);
+      border: 2px solid var(--black);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      box-shadow: 4px 4px 0 var(--black);
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+      /* aged paper */
+      background-image: repeating-linear-gradient(
+        0deg, transparent, transparent 27px,
+        rgba(200,16,46,0.03) 27px, rgba(200,16,46,0.03) 28px
+      );
+    }
+    .track-row:hover { transform: translate(-3px, -3px); box-shadow: 7px 7px 0 var(--black); }
+    .track-row.playing {
+      background: #fff8e6;
+      border-color: var(--red);
+      box-shadow: 4px 4px 0 var(--red);
+    }
+
+    .track-num {
+      font-family: 'Bangers', cursive;
+      font-size: 1.5rem;
+      color: var(--red);
+      width: 32px; text-align: center; flex-shrink: 0;
+    }
+
+    .track-row img {
+      width: 58px; height: 58px;
+      border-radius: 8px;
+      border: 2px solid var(--black);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .track-info { flex: 1; min-width: 0; }
+    .track-name { font-weight: 700; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .track-artist { font-size: 0.82rem; color: #665; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .track-duration { font-size: 0.8rem; color: #999; flex-shrink: 0; font-style: italic; }
+
+    /* Playing indicator — animated bars */
+    .playing-bars {
+      display: none;
+      align-items: flex-end;
+      gap: 2px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .track-row.playing .playing-bars { display: flex; }
+    .track-row.playing .track-num { display: none; }
+
+    .bar {
+      width: 4px;
+      background: var(--red);
+      border-radius: 2px;
+      animation: barBounce 0.6s ease-in-out infinite alternate;
+    }
+    .bar:nth-child(2) { animation-delay: 0.1s; }
+    .bar:nth-child(3) { animation-delay: 0.2s; }
+    .bar:nth-child(4) { animation-delay: 0.3s; }
+
+    @keyframes barBounce {
+      from { height: 4px; }
+      to   { height: 20px; }
+    }
+
+    /* Spotify open link */
+    .spotify-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #1DB954; color: #fff;
+      border: 2px solid var(--black);
+      border-radius: 50px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 2px 2px 0 #111;
+      flex-shrink: 0;
+      transition: transform 0.1s;
+      font-style: normal;
+    }
+    .spotify-link:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #111; }
+
+    /* ---- Spotify Embed Player ---- */
+    .player-wrap {
+      background: var(--tape-brown);
+      border: 3px solid var(--black);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.35);
+      display: none; /* shown when a song is selected */
+    }
+    .player-wrap.visible { display: block; }
+    .player-label {
+      font-family: 'Bangers', cursive;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      color: var(--yellow);
+      margin-bottom: 10px;
+      text-shadow: 1px 1px 0 var(--red);
+    }
+    .player-wrap iframe {
+      width: 100%;
+      border-radius: 12px;
+      border: none;
+      display: block;
+    }
+
+    /* ---- Loading skeletons ---- */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.06) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* ---- Share bar (fixed bottom) ---- */
+    .share-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--tape-brown);
+      border-top: 3px solid var(--yellow);
+      padding: 12px 20px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; z-index: 50; flex-wrap: wrap;
+    }
+    .share-bar span { color: var(--cream); font-size: 0.88rem; font-style: italic; }
+    #share-url-bar {
+      font-family: monospace; font-size: 0.78rem;
+      padding: 7px 12px; border: 1.5px solid #666;
+      border-radius: 8px; background: #1a0c06;
+      color: var(--green); width: 260px; max-width: 40vw;
+    }
+
+    /* ---- Error ---- */
+    .error-box { text-align: center; padding: 60px 20px; }
+
+    /* ---- EQ visualizer bar on hero ---- */
+    .eq-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 3px;
+      height: 28px;
+      margin-top: 16px;
+    }
+    .eq-bar {
+      width: 5px;
+      background: var(--green);
+      border-radius: 3px;
+      opacity: 0.7;
+      animation: eqPulse 0.8s ease-in-out infinite alternate;
+    }
+    .eq-bar:nth-child(2n)   { background: var(--yellow); animation-delay: 0.12s; }
+    .eq-bar:nth-child(3n)   { background: var(--red);    animation-delay: 0.25s; }
+    .eq-bar:nth-child(4n)   { background: var(--orange); animation-delay: 0.08s; }
+    .eq-bar:nth-child(5n)   { animation-delay: 0.35s; }
+    @keyframes eqPulse {
+      from { height: 4px; }
+      to   { height: 28px; }
+    }
+
+    /* ---- Waveform decoration ---- */
+    .waveform-wrap { overflow: hidden; height: 32px; margin: 10px 0 0; opacity: 0.4; }
+    .waveform-path { animation: waveScroll 3s linear infinite; }
+    @keyframes waveScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ---- Accent stripe ---- */
+    .accent-stripe {
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--red) 0px, var(--red) 20px,
+        var(--yellow) 20px, var(--yellow) 40px,
+        var(--green-dark) 40px, var(--green-dark) 60px,
+        var(--black) 60px, var(--black) 80px
+      );
+    }
+  </style>
+</head>
+<body>
+
+<!-- Floating music notes background -->
+<div class="music-notes-field" id="notes-field"></div>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="index.html">MEDUSA'S <span>MIXTAPES</span></a>
+  <ul class="nav-links">
+    <li><a href="library.html">Search</a></li>
+    <li><a href="create.html">Create</a></li>
+  </ul>
+</nav>
+<div class="accent-stripe"></div>
+
+<div class="page-wrap">
+
+  <!-- ======== HERO (populated by JS) ======== -->
+  <div id="tape-hero-wrap">
+    <div class="tape-hero">
+      <div style="width:360px;height:40px;margin:0 auto 16px;" class="skeleton"></div>
+      <div style="width:300px;height:60px;margin:0 auto 12px;" class="skeleton"></div>
+      <div style="width:200px;height:22px;margin:0 auto;" class="skeleton"></div>
+    </div>
+  </div>
+
+  <!-- ======== NOTE CARD ======== -->
+  <div class="note-card" id="note-card" style="display:none;">
+    <div class="note-label">A NOTE FROM THE CURATOR</div>
+    <div class="note-text" id="note-text"></div>
+  </div>
+
+  <!-- ======== ACTIONS ======== -->
+  <div class="tape-actions" id="tape-actions" style="display:none;">
+    <button class="btn btn-yellow" onclick="copyShareLink()">Copy Link</button>
+    <a href="create.html" class="btn btn-red">Make Your Own</a>
+  </div>
+
+  <!-- ======== SPOTIFY PLAYER ======== -->
+  <div class="player-wrap" id="player-wrap">
+    <div class="player-label">NOW PLAYING</div>
+    <iframe id="spotify-embed" src="" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+  </div>
+
+  <!-- ======== TRACK LIST ======== -->
+  <p class="section-heading" id="track-heading" style="display:none;">Track List</p>
+  <div id="songs-container">
+    <div style="height:86px;margin-bottom:10px;border-radius:14px;" class="skeleton"></div>
+    <div style="height:86px;margin-bottom:10px;border-radius:14px;" class="skeleton"></div>
+    <div style="height:86px;margin-bottom:10px;border-radius:14px;" class="skeleton"></div>
+  </div>
+
+</div>
+
+<!-- ======== SHARE BAR ======== -->
+<div class="share-bar" id="share-bar" style="display:none;">
+  <span>Share this tape:</span>
+  <input type="text" id="share-url-bar" readonly/>
+  <button class="btn btn-yellow btn-sm" onclick="copyShareLink()">Copy Link</button>
+  <a href="create.html" class="btn btn-red btn-sm">Make Your Own</a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="firebase-db.js"></script>
+<script src="spotify.js"></script>
+
+<script>
+  // ============================================
+  // mixtape.js — Shareable Playlist View
+  // ============================================
+
+  let currentlyPlaying = null; // track ID currently in the embed player
+
+  // ---- Boot ----
+  window.addEventListener('DOMContentLoaded', async () => {
+    spawnFloatingNotes();
+
+    const params = new URLSearchParams(window.location.search);
+    const playlistId = params.get('id');
+
+    if (!playlistId) {
+      showError('No playlist ID found in the URL.');
+      return;
+    }
+
+    initFirebase();
+
+    try {
+      const playlist = await getPlaylist(playlistId);
+      if (!playlist) {
+        showError("We couldn't find that mixtape. The link may be broken or the tape was deleted.");
+        return;
+      }
+
+      renderHero(playlist);
+      renderNote(playlist.note);
+      renderTracks(playlist.songs);
+
+      document.getElementById('tape-actions').style.display = 'flex';
+      document.getElementById('track-heading').style.display = 'block';
+
+      const shareUrl = window.location.href;
+      document.getElementById('share-url-bar').value = shareUrl;
+      document.getElementById('share-bar').style.display = 'flex';
+
+      document.title = `${playlist.name.toUpperCase()} — MEDUSA'S MIXTAPES`;
+
+    } catch (err) {
+      showError(`Failed to load: ${err.message}`);
+      console.error(err);
+    }
+  });
+
+  // ---- Render Hero ----
+  function renderHero(playlist) {
+    const songs = playlist.songs || [];
+    const totalMs  = songs.reduce((s, x) => s + (x.duration_ms || 0), 0);
+    const totalMin = Math.floor(totalMs / 60000);
+
+    let dateStr = '';
+    if (playlist.createdAt?.toDate) {
+      dateStr = playlist.createdAt.toDate().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    }
+
+    // Label color based on name length
+    const labelColors = ['#C8102E','#6B3FA0','#D4547A','#1a4a72','#8B4513'];
+    const labelColor  = labelColors[songs.length % labelColors.length];
+
+    // EQ bars HTML
+    const heights = [14,22,8,26,12,20,6,28,16,10,24,18,8,22,14];
+    const eqBars  = heights.map(h => `<div class="eq-bar" style="height:${h}px;animation-delay:${(Math.random()*0.4).toFixed(2)}s;"></div>`).join('');
+
+    // Waveform SVG path (doubles so it scrolls seamlessly)
+    const wavePath = "M0,16 C10,4 20,28 30,16 C40,4 50,28 60,16 C70,4 80,28 90,16 C100,4 110,28 120,16 C130,4 140,28 150,16 C160,4 170,28 180,16 C190,4 200,28 210,16 C220,4 230,28 240,16 C250,4 260,28 270,16 C280,4 290,28 300,16";
+
+    document.getElementById('tape-hero-wrap').innerHTML = `
+      <div class="tape-hero">
+        <div class="vinyl-bg"></div>
+
+        <!-- LARGE CASSETTE SVG (360×220) -->
+        <svg class="cassette-large" id="cassette-svg" width="360" height="220" viewBox="0 0 360 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shadow -->
+          <rect x="12" y="12" width="344" height="204" rx="22" fill="rgba(0,0,0,0.3)"/>
+          <!-- Body -->
+          <rect x="4" y="4" width="344" height="204" rx="22" fill="#2C1A0E" stroke="#111" stroke-width="3.5"/>
+          <!-- Brushed highlight stripe -->
+          <rect x="4" y="4" width="344" height="52" rx="22" fill="rgba(255,255,255,0.04)"/>
+          <!-- Label rectangle -->
+          <rect x="30" y="16" width="300" height="112" rx="12" fill="${labelColor}" stroke="#111" stroke-width="2"/>
+          <!-- Label hatch texture -->
+          <rect x="30" y="16" width="300" height="112" rx="12" fill="url(#lhatch)" opacity="0.07"/>
+          <defs>
+            <pattern id="lhatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#000" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <!-- Label shine -->
+          <rect x="30" y="16" width="300" height="34" rx="12" fill="rgba(255,255,255,0.08)"/>
+          <!-- Playlist name on label -->
+          <text x="180" y="52" text-anchor="middle" font-family="Bangers,cursive" font-size="19" fill="#FFEED5" letter-spacing="3" opacity="0.96">
+            ${playlist.name.substring(0,26).toUpperCase()}
+          </text>
+          <!-- Label ruled lines -->
+          <rect x="56" y="68" width="200" height="6" rx="3" fill="rgba(255,255,255,0.55)"/>
+          <rect x="56" y="84" width="140" height="5" rx="2.5" fill="rgba(255,255,255,0.38)"/>
+          <rect x="56" y="98" width="170" height="4" rx="2" fill="rgba(255,255,255,0.28)"/>
+          <rect x="56" y="111" width="100" height="4" rx="2" fill="rgba(255,255,255,0.2)"/>
+          <!-- Side tabs / notches -->
+          <rect x="0" y="88" width="12" height="52" rx="6" fill="#1a0c06" stroke="#111" stroke-width="2"/>
+          <rect x="348" y="88" width="12" height="52" rx="6" fill="#1a0c06" stroke="#111" stroke-width="2"/>
+          <!-- Window cutout -->
+          <rect x="108" y="146" width="144" height="44" rx="10" fill="#0d0d0d" stroke="#333" stroke-width="2"/>
+          <!-- LEFT REEL group (animated when playing) -->
+          <g class="reel-left">
+            <circle cx="108" cy="168" r="28" fill="#2a2a3a" stroke="#444" stroke-width="2.5"/>
+            <circle cx="108" cy="168" r="17" fill="#3D2B1F" stroke="#444" stroke-width="2"/>
+            <circle cx="108" cy="168" r="9"  fill="#B7E26A" stroke="#666" stroke-width="1.5"/>
+            <circle cx="108" cy="168" r="3.5" fill="#111"/>
+            <!-- Spokes -->
+            <line x1="108" y1="151" x2="108" y2="159" stroke="#666" stroke-width="2"/>
+            <line x1="98"  y1="154" x2="103" y2="161" stroke="#666" stroke-width="2"/>
+            <line x1="118" y1="154" x2="113" y2="161" stroke="#666" stroke-width="2"/>
+            <line x1="95"  y1="163" x2="103" y2="165" stroke="#666" stroke-width="2"/>
+            <line x1="121" y1="163" x2="113" y2="165" stroke="#666" stroke-width="2"/>
+          </g>
+          <!-- RIGHT REEL group -->
+          <g class="reel-right">
+            <circle cx="252" cy="168" r="28" fill="#2a2a3a" stroke="#444" stroke-width="2.5"/>
+            <circle cx="252" cy="168" r="17" fill="#3D2B1F" stroke="#444" stroke-width="2"/>
+            <circle cx="252" cy="168" r="9"  fill="#F5D060" stroke="#666" stroke-width="1.5"/>
+            <circle cx="252" cy="168" r="3.5" fill="#111"/>
+            <line x1="252" y1="151" x2="252" y2="159" stroke="#666" stroke-width="2"/>
+            <line x1="242" y1="154" x2="247" y2="161" stroke="#666" stroke-width="2"/>
+            <line x1="262" y1="154" x2="257" y2="161" stroke="#666" stroke-width="2"/>
+            <line x1="239" y1="163" x2="247" y2="165" stroke="#666" stroke-width="2"/>
+            <line x1="265" y1="163" x2="257" y2="165" stroke="#666" stroke-width="2"/>
+          </g>
+          <!-- Tape path between reels -->
+          <path d="M136 168 Q180 148 224 168" stroke="#444" stroke-width="2.5" fill="none" stroke-dasharray="6 3"/>
+          <!-- Screw holes corners -->
+          <circle cx="22"  cy="22"  r="6" fill="#111" stroke="#333" stroke-width="1.5"/>
+          <circle cx="338" cy="22"  r="6" fill="#111" stroke="#333" stroke-width="1.5"/>
+          <circle cx="22"  cy="198" r="6" fill="#111" stroke="#333" stroke-width="1.5"/>
+          <circle cx="338" cy="198" r="6" fill="#111" stroke="#333" stroke-width="1.5"/>
+          <!-- Bottom label sticker area -->
+          <rect x="130" y="194" width="100" height="16" rx="4" fill="rgba(255,255,255,0.05)" stroke="#333" stroke-width="1"/>
+          <text x="180" y="206" text-anchor="middle" font-family="Noto Serif,serif" font-size="7" fill="rgba(255,255,255,0.3)" letter-spacing="1">SIDE A</text>
+        </svg>
+
+        <h1 class="tape-title">${escapeHtml(playlist.name)}</h1>
+        ${dateStr ? `<p class="tape-meta">Curated on ${dateStr}</p>` : ''}
+
+        <div class="tape-stats">
+          <div class="stat-pill"><strong>${songs.length}</strong> tracks</div>
+          ${totalMin > 0 ? `<div class="stat-pill"><strong>${totalMin}</strong> min</div>` : ''}
+        </div>
+
+        <!-- EQ visualiser bars -->
+        <div class="eq-row">${eqBars}</div>
+
+        <!-- Scrolling waveform -->
+        <div class="waveform-wrap">
+          <svg width="200%" height="32" viewBox="0 0 600 32">
+            <path class="waveform-path" d="${wavePath} ${wavePath}" stroke="rgba(183,226,106,0.7)" stroke-width="2.5" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    `;
+  }
+
+  // ---- Render the personal note ----
+  function renderNote(note) {
+    const card = document.getElementById('note-card');
+    const text = document.getElementById('note-text');
+    if (note && note.trim()) {
+      text.textContent = note;
+      text.classList.remove('empty');
+      card.style.display = 'block';
+    }
+    // If no note, card stays hidden
+  }
+
+  // ---- Render track list ----
+  function renderTracks(songs) {
+    const container = document.getElementById('songs-container');
+    if (!songs || songs.length === 0) {
+      container.innerHTML = '<div class="empty-state">This mixtape has no songs. How mysterious!</div>';
+      return;
+    }
+
+    container.innerHTML = '';
+
+    songs.forEach((song, index) => {
+      const div = document.createElement('div');
+      div.className = 'track-row';
+      div.dataset.trackId = song.id;
+      div.title = `Play "${song.name}"`;
+
+      div.innerHTML = `
+        <!-- Playing bars (shown when this track is active) -->
+        <div class="playing-bars">
+          <div class="bar" style="height:8px"></div>
+          <div class="bar" style="height:16px"></div>
+          <div class="bar" style="height:6px"></div>
+          <div class="bar" style="height:20px"></div>
+        </div>
+
+        <!-- Track number (hidden when playing) -->
+        <span class="track-num">${index + 1}</span>
+
+        <!-- Album art -->
+        <img
+          src="${song.image || ''}"
+          alt="${escapeHtml(song.album || '')}"
+          onerror="this.style.display='none'"
+        />
+
+        <!-- Info -->
+        <div class="track-info">
+          <div class="track-name">${escapeHtml(song.name)}</div>
+          <div class="track-artist">${escapeHtml(song.artist)}</div>
+        </div>
+
+        <!-- Duration -->
+        ${song.duration_ms ? `<span class="track-duration">${formatDuration(song.duration_ms)}</span>` : ''}
+
+        <!-- Spotify open link (stops propagation so it doesn't also trigger the embed) -->
+        ${song.url ? `
+          <a class="spotify-link" href="${song.url}" target="_blank" rel="noopener noreferrer"
+             onclick="event.stopPropagation()">
+            ▶ Open
+          </a>` : ''}
+      `;
+
+      // Clicking the row loads the Spotify embed player
+      div.addEventListener('click', () => playTrack(song, div));
+
+      container.appendChild(div);
+    });
+  }
+
+  // ---- Play a track in the embedded Spotify player ----
+  function playTrack(song, rowEl) {
+    // Deactivate previously playing row
+    document.querySelectorAll('.track-row.playing').forEach(r => r.classList.remove('playing'));
+
+    // Activate this row
+    rowEl.classList.add('playing');
+    currentlyPlaying = song.id;
+
+    // Spin the cassette reels
+    const cassette = document.getElementById('cassette-svg');
+    if (cassette) cassette.classList.add('playing');
+
+    // Load the Spotify embed
+    // Spotify embed URL format: https://open.spotify.com/embed/track/{trackId}
+    const embedSrc = `https://open.spotify.com/embed/track/${song.id}?utm_source=generator&theme=0`;
+    const embedEl  = document.getElementById('spotify-embed');
+    embedEl.src    = embedSrc;
+
+    const playerWrap = document.getElementById('player-wrap');
+    playerWrap.classList.add('visible');
+
+    // Scroll the player into view
+    playerWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    showToast(`Now playing: ${song.name}`);
+  }
+
+  // ---- Error state ----
+  function showError(message) {
+    document.getElementById('tape-hero-wrap').innerHTML = '';
+    document.getElementById('songs-container').innerHTML = `
+      <div class="error-box">
+        <div style="font-size:3.5rem;margin-bottom:14px;">😵</div>
+        <h2 style="font-family:'Bangers',cursive;font-size:2rem;color:var(--red);text-shadow:2px 2px 0 #111;margin-bottom:12px;">
+          Tape Not Found
+        </h2>
+        <p style="color:#554;font-style:italic;max-width:380px;margin:0 auto 24px;">${escapeHtml(message)}</p>
+        <a href="create.html" class="btn btn-red">Make Your Own</a>
+      </div>`;
+  }
+
+  // ---- Copy share link ----
+  async function copyShareLink() {
+    const url = window.location.href;
+    try { await navigator.clipboard.writeText(url); }
+    catch { document.getElementById('share-url-bar').select(); document.execCommand('copy'); }
+    showToast('Link copied to clipboard!');
+  }
+
+  // ---- Toast ----
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  // ---- XSS protection ----
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  // ---- Spawn floating musical note emojis ----
+  function spawnFloatingNotes() {
+    const field   = document.getElementById('notes-field');
+    const symbols = ['♩','♪','♫','♬','𝄞','𝄢'];
+    const colors  = ['#C8102E','#F5D060','#B7E26A','#D4547A','#6B3FA0','#E07B39'];
+    const count   = 22;
+
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'note';
+      el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      el.style.left     = `${Math.random() * 100}%`;
+      el.style.bottom   = `-${Math.random() * 20 + 5}%`;
+      el.style.color    = colors[Math.floor(Math.random() * colors.length)];
+      el.style.fontSize = `${Math.random() * 1.2 + 0.8}rem`;
+      el.style.opacity  = '0';
+
+      // Each note has its own speed and delay
+      const duration = Math.random() * 14 + 10;
+      const delay    = Math.random() * 18;
+      el.style.animation = `floatNote ${duration}s ${delay}s linear infinite`;
+
+      field.appendChild(el);
+    }
+  }
+</script>
+
+</body>
+</html>
