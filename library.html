@@ -8,55 +8,20 @@
   <style>
     .page-header { text-align: center; padding: 40px 20px 16px; }
     .page-header p { margin-top: 8px; font-size: 1rem; color: var(--tape-brown); font-style: italic; opacity: 0.8; }
-
-    .library-layout {
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 28px;
-      padding: 0 20px 60px;
-      max-width: 960px;
-      margin: 0 auto;
-    }
+    .library-layout { display: grid; grid-template-columns: 1fr 320px; gap: 28px; padding: 0 20px 60px; max-width: 960px; margin: 0 auto; }
     @media (max-width: 720px) { .library-layout { grid-template-columns: 1fr; } }
-
-    .section-title {
-      font-family: 'Bangers', cursive;
-      font-size: 1.5rem;
-      letter-spacing: 2px;
-      color: var(--black);
-      text-shadow: 2px 2px 0 var(--red);
-      margin-bottom: 14px;
-    }
-
+    .section-title { font-family: 'Bangers', cursive; font-size: 1.5rem; letter-spacing: 2px; color: var(--black); text-shadow: 2px 2px 0 var(--red); margin-bottom: 14px; }
     #results-list { max-height: 600px; overflow-y: auto; padding-right: 4px; }
-
     .basket-panel { position: sticky; top: 80px; align-self: start; }
-    .basket-card {
-      background: var(--yellow);
-      border: 3px solid var(--black);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: var(--shadow-lg);
-      /* aged paper lines */
-      background-image: repeating-linear-gradient(
-        0deg, transparent, transparent 23px,
-        rgba(0,0,0,0.06) 23px, rgba(0,0,0,0.06) 24px
-      );
-    }
+    .basket-card { background: var(--yellow); border: 3px solid var(--black); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-lg); background-image: repeating-linear-gradient(0deg, transparent, transparent 23px, rgba(0,0,0,0.06) 23px, rgba(0,0,0,0.06) 24px); }
     .basket-card h3 { color: var(--black); text-shadow: 1px 1px 0 rgba(0,0,0,0.15); -webkit-text-stroke: 0px; margin-bottom: 12px; }
-
     #basket-list { list-style: none; max-height: 280px; overflow-y: auto; margin-bottom: 14px; }
-    #basket-list li {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 7px 0; border-bottom: 1.5px dashed rgba(0,0,0,0.2);
-      font-size: 0.84rem; font-style: italic;
-    }
+    #basket-list li { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1.5px dashed rgba(0,0,0,0.2); font-size: 0.84rem; font-style: italic; }
     #basket-list li:last-child { border-bottom: none; }
     .remove-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; padding: 2px 6px; border-radius: 50%; transition: background 0.2s; }
     .remove-btn:hover { background: rgba(0,0,0,0.1); }
     .basket-song-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px; }
     .basket-count { font-family: 'Bangers', cursive; font-size: 1rem; letter-spacing: 1px; margin-bottom: 6px; display: block; }
-
     .song-item.added { opacity: 0.6; background: #f5edd0; }
     .song-item.added .add-btn { background: #ccc; cursor: default; }
   </style>
@@ -81,14 +46,12 @@
     <input type="text" id="search-input" class="input-field" placeholder="Search for a song or artist..." autocomplete="off"/>
     <button class="btn btn-red" id="search-btn" onclick="handleSearch()">Search</button>
   </div>
-
   <div class="library-layout">
     <div class="results-panel">
       <p class="section-title">Results</p>
       <div id="search-status" class="empty-state">Type something and hit Search to find songs</div>
       <div id="results-list"></div>
     </div>
-
     <div class="basket-panel">
       <div class="basket-card">
         <h3>Your Basket</h3>
@@ -105,112 +68,186 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="config.js"></script>
-<script src="spotify.js"></script>
 <script>
-  let basket = JSON.parse(localStorage.getItem('mixtape_basket') || '[]');
-  renderBasket();
+// ============================================
+// SPOTIFY + SEARCH — all inlined, no external file needed
+// ============================================
 
-  document.getElementById('search-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') handleSearch();
-  });
+const SPOTIFY_CLIENT_ID     = 'c646a92b35f34e2b96e1e68177fa5f0d';
+const SPOTIFY_CLIENT_SECRET = 'aa6f161fa31f48ad8f7602df54f0933e';
+let _token = null;
+let _tokenExpiry = 0;
 
-  async function handleSearch() {
-    const query = document.getElementById('search-input').value.trim();
-    if (!query) return;
-    const statusEl = document.getElementById('search-status');
-    const resultsList = document.getElementById('results-list');
-    statusEl.innerHTML = '<span class="spinner"></span> Searching...';
-    statusEl.style.display = 'block';
-    resultsList.innerHTML = '';
-    try {
-      const tracks = await searchSpotify(query);
-      if (tracks.length === 0) { statusEl.textContent = 'No results found. Try a different search.'; return; }
-      statusEl.style.display = 'none';
-      tracks.forEach(track => renderSongCard(track, resultsList));
-    } catch (err) {
-      statusEl.innerHTML = `Error: ${err.message}`;
-      console.error(err);
+async function getSpotifyToken() {
+  if (_token && Date.now() < _tokenExpiry) return _token;
+
+  const creds = btoa(SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET);
+
+  // Try 1: direct (works on localhost)
+  // Try 2: corsproxy.io (works on deployed domains)
+  const endpoints = [
+    {
+      url: 'https://accounts.spotify.com/api/token',
+      opts: {
+        method: 'POST',
+        headers: { 'Authorization': 'Basic ' + creds, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'grant_type=client_credentials'
+      }
+    },
+    {
+      url: 'https://corsproxy.io/?https://accounts.spotify.com/api/token',
+      opts: {
+        method: 'POST',
+        headers: { 'Authorization': 'Basic ' + creds, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'grant_type=client_credentials'
+      }
     }
-  }
+  ];
 
-  function renderSongCard(track, container) {
-    const alreadyAdded = basket.some(s => s.id === track.id);
-    const div = document.createElement('div');
-    div.className = `song-item ${alreadyAdded ? 'added' : ''}`;
-    div.id = `track-${track.id}`;
-    div.innerHTML = `
-      <img src="${track.image || ''}" alt="${track.album}" onerror="this.style.display='none'"/>
-      <div class="song-info">
-        <div class="song-name">${track.name}</div>
-        <div class="song-artist">${track.artist} · ${formatDuration(track.duration_ms)}</div>
-      </div>
-      <button class="btn btn-red btn-sm add-btn" onclick="addToBasket('${track.id}')" ${alreadyAdded ? 'disabled' : ''}>
-        ${alreadyAdded ? '✓ Added' : '+ Add'}
-      </button>`;
-    div._trackData = track;
-    container.appendChild(div);
+  let lastErr = '';
+  for (const ep of endpoints) {
+    try {
+      const r = await fetch(ep.url, ep.opts);
+      if (r.ok) {
+        const d = await r.json();
+        _token = d.access_token;
+        _tokenExpiry = Date.now() + (d.expires_in - 60) * 1000;
+        return _token;
+      }
+      lastErr = r.status;
+    } catch (e) { lastErr = e.message; }
   }
+  throw new Error('Could not get Spotify token: ' + lastErr);
+}
 
-  function addToBasket(trackId) {
-    const el = document.getElementById(`track-${trackId}`);
-    if (!el) return;
-    const track = el._trackData;
-    if (!track) return;
-    if (basket.some(s => s.id === trackId)) { showToast('Already in your basket!'); return; }
-    basket.push(track);
-    localStorage.setItem('mixtape_basket', JSON.stringify(basket));
-    el.classList.add('added');
+async function searchSpotify(query) {
+  const token = await getSpotifyToken();
+  const url = 'https://api.spotify.com/v1/search?q=' + encodeURIComponent(query) + '&type=track&limit=10';
+  const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+  if (!r.ok) throw new Error('Search failed (' + r.status + ')');
+  const data = await r.json();
+  return data.tracks.items.map(t => ({
+    id: t.id,
+    name: t.name,
+    artist: t.artists.map(a => a.name).join(', '),
+    album: t.album.name,
+    image: (t.album.images[2] || t.album.images[0] || {}).url || '',
+    url: t.external_urls.spotify,
+    duration_ms: t.duration_ms
+  }));
+}
+
+function formatDuration(ms) {
+  const s = Math.floor(ms / 1000);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+// ============================================
+// PAGE LOGIC
+// ============================================
+
+let basket = JSON.parse(localStorage.getItem('mixtape_basket') || '[]');
+renderBasket();
+
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleSearch();
+});
+
+async function handleSearch() {
+  const query = document.getElementById('search-input').value.trim();
+  if (!query) return;
+  const statusEl = document.getElementById('search-status');
+  const resultsList = document.getElementById('results-list');
+  statusEl.innerHTML = '<span class="spinner"></span> Searching...';
+  statusEl.style.display = 'block';
+  resultsList.innerHTML = '';
+  try {
+    const tracks = await searchSpotify(query);
+    if (tracks.length === 0) { statusEl.textContent = 'No results found. Try a different search.'; return; }
+    statusEl.style.display = 'none';
+    tracks.forEach(track => renderSongCard(track, resultsList));
+  } catch (err) {
+    statusEl.innerHTML = 'Error: ' + err.message;
+    console.error(err);
+  }
+}
+
+function renderSongCard(track, container) {
+  const alreadyAdded = basket.some(s => s.id === track.id);
+  const div = document.createElement('div');
+  div.className = 'song-item ' + (alreadyAdded ? 'added' : '');
+  div.id = 'track-' + track.id;
+  div.innerHTML =
+    '<img src="' + (track.image || '') + '" alt="' + track.album + '" onerror="this.style.display=\'none\'"/>' +
+    '<div class="song-info">' +
+      '<div class="song-name">' + track.name + '</div>' +
+      '<div class="song-artist">' + track.artist + ' · ' + formatDuration(track.duration_ms) + '</div>' +
+    '</div>' +
+    '<button class="btn btn-red btn-sm add-btn" onclick="addToBasket(\'' + track.id + '\')" ' + (alreadyAdded ? 'disabled' : '') + '>' +
+      (alreadyAdded ? '✓ Added' : '+ Add') +
+    '</button>';
+  div._trackData = track;
+  container.appendChild(div);
+}
+
+function addToBasket(trackId) {
+  const el = document.getElementById('track-' + trackId);
+  if (!el || !el._trackData) return;
+  const track = el._trackData;
+  if (basket.some(s => s.id === trackId)) { showToast('Already in your basket!'); return; }
+  basket.push(track);
+  localStorage.setItem('mixtape_basket', JSON.stringify(basket));
+  el.classList.add('added');
+  const btn = el.querySelector('.add-btn');
+  btn.textContent = '✓ Added'; btn.disabled = true;
+  renderBasket();
+  showToast('"' + track.name + '" added!');
+}
+
+function renderBasket() {
+  const list = document.getElementById('basket-list');
+  const countEl = document.getElementById('basket-count');
+  const emptyEl = document.getElementById('basket-empty');
+  countEl.textContent = basket.length + ' song' + (basket.length !== 1 ? 's' : '') + ' added';
+  emptyEl.style.display = basket.length === 0 ? 'block' : 'none';
+  list.innerHTML = '';
+  basket.forEach(song => {
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="basket-song-name" title="' + song.name + '">' + song.name + '</span>' +
+      '<button class="remove-btn" onclick="removeFromBasket(\'' + song.id + '\')">✕</button>';
+    list.appendChild(li);
+  });
+}
+
+function removeFromBasket(trackId) {
+  basket = basket.filter(s => s.id !== trackId);
+  localStorage.setItem('mixtape_basket', JSON.stringify(basket));
+  const el = document.getElementById('track-' + trackId);
+  if (el) { el.classList.remove('added'); const btn = el.querySelector('.add-btn'); if (btn) { btn.textContent = '+ Add'; btn.disabled = false; } }
+  renderBasket();
+  showToast('Song removed');
+}
+
+function clearBasket() {
+  if (basket.length === 0) return;
+  if (!confirm('Clear all songs from your basket?')) return;
+  basket = [];
+  localStorage.setItem('mixtape_basket', JSON.stringify(basket));
+  document.querySelectorAll('.song-item.added').forEach(el => {
+    el.classList.remove('added');
     const btn = el.querySelector('.add-btn');
-    btn.textContent = '✓ Added'; btn.disabled = true;
-    renderBasket();
-    showToast(`"${track.name}" added!`);
-  }
+    if (btn) { btn.textContent = '+ Add'; btn.disabled = false; }
+  });
+  renderBasket();
+  showToast('Basket cleared!');
+}
 
-  function renderBasket() {
-    const list = document.getElementById('basket-list');
-    const countEl = document.getElementById('basket-count');
-    const emptyEl = document.getElementById('basket-empty');
-    countEl.textContent = `${basket.length} song${basket.length !== 1 ? 's' : ''} added`;
-    emptyEl.style.display = basket.length === 0 ? 'block' : 'none';
-    list.innerHTML = '';
-    basket.forEach(song => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span class="basket-song-name" title="${song.name}">${song.name}</span>
-        <button class="remove-btn" onclick="removeFromBasket('${song.id}')">✕</button>`;
-      list.appendChild(li);
-    });
-  }
-
-  function removeFromBasket(trackId) {
-    basket = basket.filter(s => s.id !== trackId);
-    localStorage.setItem('mixtape_basket', JSON.stringify(basket));
-    const el = document.getElementById(`track-${trackId}`);
-    if (el) { el.classList.remove('added'); const btn = el.querySelector('.add-btn'); if (btn) { btn.textContent = '+ Add'; btn.disabled = false; } }
-    renderBasket();
-    showToast('Song removed');
-  }
-
-  function clearBasket() {
-    if (basket.length === 0) return;
-    if (!confirm('Clear all songs from your basket?')) return;
-    basket = [];
-    localStorage.setItem('mixtape_basket', JSON.stringify(basket));
-    document.querySelectorAll('.song-item.added').forEach(el => {
-      el.classList.remove('added');
-      const btn = el.querySelector('.add-btn');
-      if (btn) { btn.textContent = '+ Add'; btn.disabled = false; }
-    });
-    renderBasket();
-    showToast('Basket cleared!');
-  }
-
-  function showToast(message) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-  }
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
 </script>
 </body>
 </html>
