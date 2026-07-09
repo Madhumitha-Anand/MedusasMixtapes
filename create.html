@@ -27,7 +27,6 @@
     .field-label { display: block; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; font-style: italic; }
     .field-group { margin-bottom: 22px; }
 
-    /* Live cassette label preview */
     .cassette-label-preview {
       background: var(--red);
       border: 3px solid var(--black);
@@ -49,7 +48,6 @@
     .lbl-sub { font-size: 0.72rem; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 6px; font-style: normal; }
     .label-name-live { font-family: 'Permanent Marker', cursive; font-size: 1.5rem; color: var(--yellow); text-shadow: 1px 1px 0 rgba(0,0,0,0.3); word-break: break-word; display: block; }
 
-    /* Note textarea */
     .note-textarea {
       width: 100%;
       padding: 14px 18px;
@@ -71,7 +69,6 @@
     .note-textarea:focus { box-shadow: var(--shadow-lg); }
     .note-textarea::placeholder { font-family: 'Noto Serif', serif; font-style: italic; font-size: 0.9rem; color: #bbb; }
 
-    /* Song preview list */
     #song-list-preview { list-style: none; margin-top: 8px; }
     #song-list-preview li {
       display: flex; align-items: center; gap: 12px;
@@ -92,7 +89,6 @@
 
     #save-btn { width: 100%; font-size: 1.1rem; padding: 18px; }
 
-    /* Success panel */
     .success-panel {
       display: none; background: var(--white); border: 3px solid var(--black);
       border-radius: 20px; padding: 40px 32px; text-align: center;
@@ -131,28 +127,23 @@
 
 <div class="container" style="max-width:680px; padding-top:0;">
 
-  <!-- CREATE FORM -->
   <div class="create-card" id="create-form">
 
-    <!-- Live label preview -->
     <div class="cassette-label-preview">
       <p class="lbl-sub">Now Playing</p>
       <span class="label-name-live" id="label-live">My Awesome Mixtape</span>
     </div>
 
-    <!-- Name -->
     <div class="field-group">
       <label class="field-label" for="playlist-name">Tape Name</label>
       <input type="text" id="playlist-name" class="input-field" placeholder="e.g. Late Night Drive Vol. 3" maxlength="60" style="border-radius:12px;"/>
     </div>
 
-    <!-- Personal Note -->
     <div class="field-group">
       <label class="field-label" for="playlist-note">A Note to Your Listener <span style="font-style:normal;opacity:0.5;font-size:0.8rem;">(optional)</span></label>
       <textarea id="playlist-note" class="note-textarea" placeholder="Write a little message to whoever receives this tape…" maxlength="280"></textarea>
     </div>
 
-    <!-- Songs -->
     <div class="field-group">
       <label class="field-label">Your Songs &nbsp;<span class="badge" id="song-count-badge">0</span></label>
       <div id="no-songs-msg" style="text-align:center;padding:24px;opacity:0.55;font-style:italic;">
@@ -166,7 +157,6 @@
     <button class="btn btn-red btn-lg" id="save-btn">Save &amp; Get Link</button>
   </div>
 
-  <!-- SUCCESS PANEL -->
   <div class="success-panel" id="success-panel">
     <span class="success-big-emoji">🎉</span>
     <h2>Tape is Ready!</h2>
@@ -192,12 +182,10 @@
 
   renderPreview();
 
-  // Live label preview
   document.getElementById('playlist-name').addEventListener('input', function() {
     document.getElementById('label-live').textContent = this.value.trim() || 'My Awesome Mixtape';
   });
 
-  // Save button
   document.getElementById('save-btn').addEventListener('click', handleSave);
 
   function renderPreview() {
@@ -238,9 +226,8 @@
     saveBtn.innerHTML = '<span class="spinner"></span> Saving your tape…';
 
     try {
-      // Pass name, songs, and optional note to Firestore
       const docId = await savePlaylist(name, basket, note);
-      const pageBase = window.location.href.replace(/create\.html.*$/, '');
+      const pageBase = 'https://medusas-mixtapes.vercel.app/';
       const shareUrl = `${pageBase}mixtape.html?id=${docId}`;
 
       document.getElementById('share-url-out').value = shareUrl;
