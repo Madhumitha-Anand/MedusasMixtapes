@@ -69,62 +69,62 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ============================================
-// SPOTIFY + SEARCH — all inlined, no external file needed
-// ============================================
-
-const SPOTIFY_CLIENT_ID     = 'c646a92b35f34e2b96e1e68177fa5f0d';
-const SPOTIFY_CLIENT_SECRET = 'aa6f161fa31f48ad8f7602df54f0933e';
+const CLIENT_ID     = 'c646a92b35f34e2b96e1e68177fa5f0d';
+const CLIENT_SECRET = 'aa6f161fa31f48ad8f7602df54f0933e';
 let _token = null;
 let _tokenExpiry = 0;
 
 async function getSpotifyToken() {
   if (_token && Date.now() < _tokenExpiry) return _token;
 
-  const creds = btoa(SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET);
+  const creds = btoa(CLIENT_ID + ':' + CLIENT_SECRET);
+  const body  = 'grant_type=client_credentials';
+  const headers = {
+    'Authorization': 'Basic ' + creds,
+    'Content-Type': 'application/x-www-form-urlencoded'
+  };
 
-  // Try 1: direct (works on localhost)
-  // Try 2: corsproxy.io (works on deployed domains)
-  const endpoints = [
-    {
-      url: 'https://accounts.spotify.com/api/token',
-      opts: {
-        method: 'POST',
-        headers: { 'Authorization': 'Basic ' + creds, 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'grant_type=client_credentials'
-      }
-    },
-    {
-      url: 'https://corsproxy.io/?https://accounts.spotify.com/api/token',
-      opts: {
-        method: 'POST',
-        headers: { 'Authorization': 'Basic ' + creds, 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'grant_type=client_credentials'
-      }
-    }
+  const proxies = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url=',
+    'https://proxy.cors.sh/',
   ];
 
-  let lastErr = '';
-  for (const ep of endpoints) {
+  const targetUrl = 'https://accounts.spotify.com/api/token';
+
+  try {
+    const r = await fetch(targetUrl, { method:'POST', headers, body });
+    if (r.ok) {
+      const d = await r.json();
+      _token = d.access_token;
+      _tokenExpiry = Date.now() + (d.expires_in - 60) * 1000;
+      return _token;
+    }
+  } catch(e) {}
+
+  for (const proxy of proxies) {
     try {
-      const r = await fetch(ep.url, ep.opts);
+      const proxyUrl = proxy + encodeURIComponent(targetUrl);
+      const r = await fetch(proxyUrl, { method:'POST', headers, body });
       if (r.ok) {
         const d = await r.json();
-        _token = d.access_token;
-        _tokenExpiry = Date.now() + (d.expires_in - 60) * 1000;
-        return _token;
+        if (d.access_token) {
+          _token = d.access_token;
+          _tokenExpiry = Date.now() + ((d.expires_in || 3600) - 60) * 1000;
+          return _token;
+        }
       }
-      lastErr = r.status;
-    } catch (e) { lastErr = e.message; }
+    } catch(e) { continue; }
   }
-  throw new Error('Could not get Spotify token: ' + lastErr);
+
+  throw new Error('All token attempts failed. Check Spotify credentials.');
 }
 
 async function searchSpotify(query) {
   const token = await getSpotifyToken();
   const url = 'https://api.spotify.com/v1/search?q=' + encodeURIComponent(query) + '&type=track&limit=10';
   const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
-  if (!r.ok) throw new Error('Search failed (' + r.status + ')');
+  if (!r.ok) throw new Error('Search request failed: ' + r.status);
   const data = await r.json();
   return data.tracks.items.map(t => ({
     id: t.id,
@@ -141,10 +141,6 @@ function formatDuration(ms) {
   const s = Math.floor(ms / 1000);
   return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 }
-
-// ============================================
-// PAGE LOGIC
-// ============================================
 
 let basket = JSON.parse(localStorage.getItem('mixtape_basket') || '[]');
 renderBasket();
@@ -178,12 +174,12 @@ function renderSongCard(track, container) {
   div.className = 'song-item ' + (alreadyAdded ? 'added' : '');
   div.id = 'track-' + track.id;
   div.innerHTML =
-    '<img src="' + (track.image || '') + '" alt="' + track.album + '" onerror="this.style.display=\'none\'"/>' +
+    '<img src="' + (track.image||'') + '" alt="" onerror="this.style.display=\'none\'"/>' +
     '<div class="song-info">' +
       '<div class="song-name">' + track.name + '</div>' +
       '<div class="song-artist">' + track.artist + ' · ' + formatDuration(track.duration_ms) + '</div>' +
     '</div>' +
-    '<button class="btn btn-red btn-sm add-btn" onclick="addToBasket(\'' + track.id + '\')" ' + (alreadyAdded ? 'disabled' : '') + '>' +
+    '<button class="btn btn-red btn-sm add-btn" onclick="addToBasket(\'' + track.id + '\')" ' + (alreadyAdded?'disabled':'') + '>' +
       (alreadyAdded ? '✓ Added' : '+ Add') +
     '</button>';
   div._trackData = track;
@@ -213,7 +209,7 @@ function renderBasket() {
   list.innerHTML = '';
   basket.forEach(song => {
     const li = document.createElement('li');
-    li.innerHTML = '<span class="basket-song-name" title="' + song.name + '">' + song.name + '</span>' +
+    li.innerHTML = '<span class="basket-song-name">' + song.name + '</span>' +
       '<button class="remove-btn" onclick="removeFromBasket(\'' + song.id + '\')">✕</button>';
     list.appendChild(li);
   });
@@ -242,11 +238,10 @@ function clearBasket() {
   showToast('Basket cleared!');
 }
 
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2500);
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
 }
 </script>
 </body>
