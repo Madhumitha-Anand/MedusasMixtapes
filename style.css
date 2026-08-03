@@ -1,9 +1,9 @@
 /* ============================================
    MEDUSA'S MIXTAPES — Global Stylesheet
-   Vintage cassette aesthetic, Noto Serif
+   Vintage cassette aesthetic, Alfa Slab One
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Permanent+Marker&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Permanent+Marker&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 
 :root {
   --green: #B7E26A;
@@ -26,17 +26,10 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  /* Vintage warm green with paper grain texture overlay */
   background-color: #A8D455;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"),
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 28px,
-      rgba(0,0,0,0.018) 28px,
-      rgba(0,0,0,0.018) 29px
-    ),
+    repeating-linear-gradient(45deg, transparent, transparent 28px, rgba(0,0,0,0.018) 28px, rgba(0,0,0,0.018) 29px),
     radial-gradient(ellipse at 20% 50%, rgba(183,226,106,0.6) 0%, transparent 60%),
     radial-gradient(ellipse at 80% 20%, rgba(240,200,80,0.2) 0%, transparent 50%);
   font-family: 'Noto Serif', Georgia, serif;
@@ -46,7 +39,7 @@ body {
 
 /* ---- Typography ---- */
 h1, h2, h3 {
-  font-family: 'Bangers', cursive;
+  font-family: 'Alfa Slab One', serif;
   letter-spacing: 2px;
   color: var(--red);
   -webkit-text-stroke: 1px var(--black);
@@ -62,8 +55,8 @@ p { font-size: 1rem; line-height: 1.7; }
 /* ---- Buttons ---- */
 .btn {
   display: inline-block;
-  font-family: 'Noto Serif', serif;
-  font-weight: 700;
+  font-family: 'Alfa Slab One', serif;
+  letter-spacing: 1.5px;
   font-size: 0.95rem;
   padding: 12px 24px;
   border: var(--border);
@@ -73,7 +66,6 @@ p { font-size: 1rem; line-height: 1.7; }
   text-align: center;
   transition: transform 0.1s, box-shadow 0.1s;
   box-shadow: var(--shadow);
-  letter-spacing: 0.5px;
 }
 .btn:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
 .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #1a1008; }
@@ -83,7 +75,7 @@ p { font-size: 1rem; line-height: 1.7; }
 .btn-black { background: var(--black); color: var(--white); }
 .btn-white { background: var(--white); color: var(--black); }
 .btn-green { background: var(--green-dark); color: var(--black); }
-.btn-sm { padding: 6px 16px; font-size: 0.82rem; }
+.btn-sm { padding: 6px 16px; font-size: 0.78rem; }
 .btn-lg { padding: 16px 36px; font-size: 1.1rem; }
 
 /* ---- Navbar ---- */
@@ -97,34 +89,25 @@ p { font-size: 1rem; line-height: 1.7; }
   position: sticky;
   top: 0;
   z-index: 100;
-  /* subtle wood grain texture on nav */
-  background-image: repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 60px,
-    rgba(255,255,255,0.02) 60px,
-    rgba(255,255,255,0.02) 61px
-  );
+  background-image: repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,0.02) 60px, rgba(255,255,255,0.02) 61px);
 }
-
 .navbar-brand {
-  font-family: 'Bangers', cursive;
-  font-size: 1.8rem;
+  font-family: 'Alfa Slab One', serif;
+  font-size: 1.6rem;
   color: var(--green);
   text-decoration: none;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   text-shadow: 2px 2px 0 var(--red);
   text-transform: uppercase;
 }
 .navbar-brand span { color: var(--yellow); }
-
 .nav-links { display: flex; gap: 16px; list-style: none; }
 .nav-links a {
   color: var(--cream);
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  font-style: italic;
+  font-family: 'Alfa Slab One', serif;
+  letter-spacing: 1.5px;
+  font-size: 0.85rem;
   transition: color 0.2s;
 }
 .nav-links a:hover { color: var(--yellow); }
@@ -133,26 +116,14 @@ p { font-size: 1rem; line-height: 1.7; }
 .container { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
 
 /* ---- Cards ---- */
-.card {
-  background: var(--white);
-  border: var(--border);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: var(--shadow-lg);
-}
+.card { background: var(--white); border: var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-lg); }
 
 /* ---- Song Item ---- */
 .song-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--white);
-  border: 2px solid var(--black);
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin-bottom: 10px;
-  box-shadow: 3px 3px 0 var(--black);
-  transition: transform 0.15s;
+  display: flex; align-items: center; gap: 14px;
+  background: var(--white); border: 2px solid var(--black);
+  border-radius: 12px; padding: 12px 16px; margin-bottom: 10px;
+  box-shadow: 3px 3px 0 var(--black); transition: transform 0.15s;
 }
 .song-item:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--black); }
 .song-item img { width: 54px; height: 54px; border-radius: 8px; border: 2px solid var(--black); object-fit: cover; flex-shrink: 0; }
@@ -162,53 +133,29 @@ p { font-size: 1rem; line-height: 1.7; }
 
 /* ---- Input Fields ---- */
 .input-field {
-  width: 100%;
-  padding: 12px 20px;
-  border: var(--border);
-  border-radius: 50px;
-  font-family: 'Noto Serif', serif;
-  font-size: 1rem;
-  outline: none;
-  box-shadow: var(--shadow);
-  background: var(--white);
-  transition: box-shadow 0.2s;
+  width: 100%; padding: 12px 20px; border: var(--border); border-radius: 50px;
+  font-family: 'Noto Serif', serif; font-size: 1rem; outline: none;
+  box-shadow: var(--shadow); background: var(--white); transition: box-shadow 0.2s;
 }
 .input-field:focus { box-shadow: var(--shadow-lg); }
-
 .search-row { display: flex; gap: 12px; margin-bottom: 28px; }
 
 /* ---- Badge ---- */
 .badge {
-  display: inline-block;
-  background: var(--yellow);
-  border: 2px solid var(--black);
-  border-radius: 50px;
-  padding: 4px 12px;
-  font-weight: 700;
-  font-size: 0.8rem;
-  box-shadow: 2px 2px 0 #1a1008;
+  display: inline-block; background: var(--yellow); border: 2px solid var(--black);
+  border-radius: 50px; padding: 4px 12px; font-weight: 700; font-size: 0.8rem;
+  box-shadow: 2px 2px 0 #1a1008; font-family: 'Alfa Slab One', serif;
 }
 .badge-red { background: var(--red); color: #fff; }
 
 /* ---- Toast ---- */
 .toast {
-  position: fixed;
-  bottom: 32px;
-  right: 32px;
-  background: var(--tape-brown);
-  color: var(--yellow);
-  font-weight: 700;
-  font-style: italic;
-  padding: 14px 24px;
-  border-radius: 12px;
-  border: 2px solid var(--yellow);
-  box-shadow: var(--shadow-lg);
-  z-index: 999;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.3s ease;
-  pointer-events: none;
-  font-family: 'Noto Serif', serif;
+  position: fixed; bottom: 32px; right: 32px;
+  background: var(--tape-brown); color: var(--yellow);
+  font-family: 'Alfa Slab One', serif; letter-spacing: 1px;
+  padding: 14px 24px; border-radius: 12px; border: 2px solid var(--yellow);
+  box-shadow: var(--shadow-lg); z-index: 999; opacity: 0;
+  transform: translateY(20px); transition: all 0.3s ease; pointer-events: none;
 }
 .toast.show { opacity: 1; transform: translateY(0); }
 
