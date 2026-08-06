@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Create Mixtape — MEDUSA'S MIXTAPES</title>
+  <title>Build Your Tape — MEDUSA'S MIXTAPES</title>
   <link rel="stylesheet" href="style.css"/>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -24,38 +24,25 @@
       );
     }
 
-    .field-label { display: block; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; font-style: italic; }
+    .field-label {
+      display: block;
+      font-family: 'Alfa Slab One', serif;
+      letter-spacing: 1.5px;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: var(--black);
+    }
     .field-group { margin-bottom: 22px; }
 
-    .cassette-label-preview {
-      background: var(--red);
-      border: 3px solid var(--black);
-      border-radius: 14px;
-      padding: 18px 22px;
-      margin-bottom: 24px;
-      position: relative;
-      overflow: hidden;
-      background-image: repeating-linear-gradient(
-        45deg, transparent, transparent 8px,
-        rgba(0,0,0,0.04) 8px, rgba(0,0,0,0.04) 9px
-      );
-    }
-    .cassette-label-preview::after {
-      content: '♪ ♫ ♪';
-      position: absolute; bottom: 6px; right: 12px;
-      font-size: 1rem; opacity: 0.2; letter-spacing: 4px;
-    }
-    .lbl-sub { font-size: 0.72rem; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 6px; font-style: normal; }
-    .label-name-live { font-family: 'Permanent Marker', cursive; font-size: 1.5rem; color: var(--yellow); text-shadow: 1px 1px 0 rgba(0,0,0,0.3); word-break: break-word; display: block; }
-
+    /* Note textarea — Alfa Slab One font, lined notebook paper */
     .note-textarea {
       width: 100%;
       padding: 14px 18px;
       border: 3px solid var(--black);
       border-radius: 12px;
-      font-family: 'Permanent Marker', cursive;
-      font-size: 1rem;
-      line-height: 1.8;
+      font-family: 'Alfa Slab One', serif;
+      font-size: 0.95rem;
+      line-height: 1.95;
       resize: vertical;
       min-height: 90px;
       background: #FFF9E6;
@@ -65,9 +52,16 @@
       );
       box-shadow: var(--shadow);
       outline: none;
+      letter-spacing: 0.5px;
     }
     .note-textarea:focus { box-shadow: var(--shadow-lg); }
-    .note-textarea::placeholder { font-family: 'Noto Serif', serif; font-style: italic; font-size: 0.9rem; color: #bbb; }
+    .note-textarea::placeholder {
+      font-family: 'Noto Serif', serif;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: #bbb;
+      letter-spacing: 0;
+    }
 
     #song-list-preview { list-style: none; margin-top: 8px; }
     #song-list-preview li {
@@ -81,14 +75,29 @@
     .prev-info { flex: 1; min-width: 0; }
     .prev-name { font-weight: 700; font-size: 0.9rem; }
     .prev-artist { font-size: 0.78rem; color: #776; font-style: italic; }
-    .track-bubble { width: 24px; height: 24px; background: var(--black); color: var(--yellow); border-radius: 50%; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .remove-song-btn { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 50%; color: #bbb; transition: color 0.2s, background 0.2s; }
+    .track-bubble {
+      width: 26px; height: 26px; background: var(--black); color: var(--yellow);
+      border-radius: 50%; font-family: 'Alfa Slab One', serif; font-size: 0.75rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .remove-song-btn {
+      background: none; border: none; cursor: pointer; font-size: 1rem;
+      padding: 4px 8px; border-radius: 50%; color: #bbb; transition: color 0.2s, background 0.2s;
+    }
     .remove-song-btn:hover { color: var(--red); background: #ffe5e5; }
 
-    .form-error { display: none; background: #ffe5e5; border: 2px solid var(--red); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-weight: 700; color: var(--red); font-style: italic; }
+    .form-error {
+      display: none; background: #ffe5e5; border: 2px solid var(--red);
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+      font-weight: 700; color: var(--red); font-style: italic;
+    }
 
-    #save-btn { width: 100%; font-size: 1.1rem; padding: 18px; }
+    #save-btn {
+      width: 100%; font-family: 'Alfa Slab One', serif;
+      letter-spacing: 2px; font-size: 1.2rem; padding: 18px;
+    }
 
+    /* Success panel */
     .success-panel {
       display: none; background: var(--white); border: 3px solid var(--black);
       border-radius: 20px; padding: 40px 32px; text-align: center;
@@ -100,13 +109,36 @@
       );
     }
     @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .success-big-emoji { font-size: 4rem; display: block; margin-bottom: 12px; animation: bounceY 1.2s ease infinite; }
-    @keyframes bounceY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-    .success-panel h2 { font-size: 2.8rem; margin-bottom: 8px; }
-    .success-panel > p { font-weight: 600; font-style: italic; color: #554; margin-bottom: 20px; }
+
+    /* Animated cassette SVG replaces the popper emoji */
+    .cassette-success {
+      display: block;
+      margin: 0 auto 16px;
+      animation: successWobble 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes successWobble {
+      from { transform: rotate(-8deg) scale(1); }
+      to   { transform: rotate(8deg) scale(1.08); }
+    }
+    /* Spinning reels on success cassette */
+    .success-reel-l { transform-origin: 54px 84px; animation: reelSpin 0.8s linear infinite; }
+    .success-reel-r { transform-origin: 126px 84px; animation: reelSpin 0.8s linear infinite; }
+    @keyframes reelSpin { to { transform: rotate(360deg); } }
+
+    .success-panel h2 {
+      font-family: 'Alfa Slab One', serif;
+      font-size: 2.6rem;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .success-panel > p { font-style: italic; color: #554; margin-bottom: 20px; }
 
     .share-link-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
-    #share-url-out { flex: 1; min-width: 180px; max-width: 380px; font-family: monospace; font-size: 0.85rem; padding: 12px 14px; border: 3px solid var(--black); border-radius: 12px; background: #f4ead5; color: #333; }
+    #share-url-out {
+      flex: 1; min-width: 180px; max-width: 380px;
+      font-family: monospace; font-size: 0.85rem; padding: 12px 14px;
+      border: 3px solid var(--black); border-radius: 12px; background: #f4ead5; color: #333;
+    }
     .success-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   </style>
 </head>
@@ -127,20 +159,31 @@
 
 <div class="container" style="max-width:680px; padding-top:0;">
 
+  <!-- CREATE FORM -->
   <div class="create-card" id="create-form">
 
+    <!-- Tape Name -->
     <div class="field-group">
       <label class="field-label" for="playlist-name">Tape Name</label>
-      <input type="text" id="playlist-name" class="input-field" placeholder="e.g. Late Night Drive Vol. 3" maxlength="60" style="border-radius:12px;"/>
+      <input type="text" id="playlist-name" class="input-field"
+        placeholder="e.g. Late Night Drive Vol. 3" maxlength="60" style="border-radius:12px;"/>
     </div>
 
+    <!-- Personal Note -->
     <div class="field-group">
-      <label class="field-label" for="playlist-note">A Note to Your Listener <span style="font-style:normal;opacity:0.5;font-size:0.8rem;">(optional)</span></label>
-      <textarea id="playlist-note" class="note-textarea" placeholder="Write a little message to whoever receives this tape…" maxlength="280"></textarea>
+      <label class="field-label" for="playlist-note">
+        A Note to Your Listener
+        <span style="font-family:'Noto Serif',serif;font-size:0.75rem;opacity:0.45;letter-spacing:0;font-weight:400;"> (optional)</span>
+      </label>
+      <textarea id="playlist-note" class="note-textarea"
+        placeholder="Write a little message to whoever receives this tape…" maxlength="280"></textarea>
     </div>
 
+    <!-- Song List -->
     <div class="field-group">
-      <label class="field-label">Your Songs &nbsp;<span class="badge" id="song-count-badge">0</span></label>
+      <label class="field-label">
+        Your Songs &nbsp;<span class="badge" id="song-count-badge">0</span>
+      </label>
       <div id="no-songs-msg" style="text-align:center;padding:24px;opacity:0.55;font-style:italic;">
         No songs yet — <a href="library.html" style="color:var(--red);">search for some →</a>
       </div>
@@ -152,8 +195,56 @@
     <button class="btn btn-red btn-lg" id="save-btn">Save &amp; Get Link</button>
   </div>
 
+  <!-- SUCCESS PANEL -->
   <div class="success-panel" id="success-panel">
-    <span class="success-big-emoji">🎉</span>
+
+    <!-- Animated cassette SVG instead of popper emoji -->
+    <svg class="cassette-success" width="180" height="110" viewBox="0 0 180 110" fill="none">
+      <!-- Shadow -->
+      <rect x="7" y="7" width="170" height="100" rx="12" fill="rgba(0,0,0,0.25)"/>
+      <!-- Body -->
+      <rect x="3" y="3" width="170" height="100" rx="12" fill="#2C1A0E" stroke="#111" stroke-width="2.5"/>
+      <!-- Label -->
+      <rect x="16" y="10" width="148" height="54" rx="7" fill="#C8102E" stroke="#111" stroke-width="1.5"/>
+      <rect x="16" y="10" width="148" height="16" rx="7" fill="rgba(255,255,255,0.07)"/>
+      <!-- Label lines -->
+      <rect x="28" y="20" width="90" height="4" rx="2" fill="rgba(255,255,255,0.55)"/>
+      <rect x="28" y="31" width="65" height="3" rx="2" fill="rgba(255,255,255,0.38)"/>
+      <rect x="28" y="41" width="78" height="3" rx="2" fill="rgba(255,255,255,0.25)"/>
+      <!-- Side tabs -->
+      <rect x="0" y="36" width="7" height="28" rx="3" fill="#1a0c06" stroke="#111" stroke-width="1"/>
+      <rect x="171" y="36" width="7" height="28" rx="3" fill="#1a0c06" stroke="#111" stroke-width="1"/>
+      <!-- Window -->
+      <rect x="44" y="72" width="92" height="24" rx="6" fill="#0d0d0d" stroke="#333" stroke-width="1.5"/>
+      <!-- Left reel (animated) -->
+      <g class="success-reel-l">
+        <circle cx="54" cy="84" r="16" fill="#2a2a3a" stroke="#444" stroke-width="1.5"/>
+        <circle cx="54" cy="84" r="9" fill="#3D2B1F" stroke="#444" stroke-width="1.5"/>
+        <circle cx="54" cy="84" r="5" fill="#B7E26A" stroke="#555" stroke-width="1"/>
+        <circle cx="54" cy="84" r="2" fill="#111"/>
+        <line x1="54" y1="75" x2="54" y2="79" stroke="#666" stroke-width="1.5"/>
+        <line x1="48" y1="77" x2="51" y2="81" stroke="#666" stroke-width="1.5"/>
+        <line x1="60" y1="77" x2="57" y2="81" stroke="#666" stroke-width="1.5"/>
+      </g>
+      <!-- Right reel (animated) -->
+      <g class="success-reel-r">
+        <circle cx="126" cy="84" r="16" fill="#2a2a3a" stroke="#444" stroke-width="1.5"/>
+        <circle cx="126" cy="84" r="9" fill="#3D2B1F" stroke="#444" stroke-width="1.5"/>
+        <circle cx="126" cy="84" r="5" fill="#F5D060" stroke="#555" stroke-width="1"/>
+        <circle cx="126" cy="84" r="2" fill="#111"/>
+        <line x1="126" y1="75" x2="126" y2="79" stroke="#666" stroke-width="1.5"/>
+        <line x1="120" y1="77" x2="123" y2="81" stroke="#666" stroke-width="1.5"/>
+        <line x1="132" y1="77" x2="129" y2="81" stroke="#666" stroke-width="1.5"/>
+      </g>
+      <!-- Tape path -->
+      <path d="M70 84 Q90 74 110 84" stroke="#444" stroke-width="2" fill="none" stroke-dasharray="4 2"/>
+      <!-- Screw holes -->
+      <circle cx="12" cy="12" r="3.5" fill="#111" stroke="#333" stroke-width="1"/>
+      <circle cx="168" cy="12" r="3.5" fill="#111" stroke="#333" stroke-width="1"/>
+      <circle cx="12" cy="98" r="3.5" fill="#111" stroke="#333" stroke-width="1"/>
+      <circle cx="168" cy="98" r="3.5" fill="#111" stroke="#333" stroke-width="1"/>
+    </svg>
+
     <h2>Tape is Ready!</h2>
     <p>Your mixtape is live. Share this link with anyone:</p>
     <div class="share-link-row">
@@ -165,6 +256,7 @@
       <a href="library.html" class="btn btn-black">Make Another</a>
     </div>
   </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -176,11 +268,6 @@
   let basket = JSON.parse(localStorage.getItem('mixtape_basket') || '[]');
 
   renderPreview();
-
-  document.getElementById('playlist-name').addEventListener('input', function() {
-    document.getElementById('label-live').textContent = this.value.trim() || 'My Awesome Mixtape';
-  });
-
   document.getElementById('save-btn').addEventListener('click', handleSave);
 
   function renderPreview() {
@@ -192,12 +279,25 @@
     list.innerHTML = '';
     basket.forEach((song, idx) => {
       const li = document.createElement('li');
-      const bubble = document.createElement('span'); bubble.className = 'track-bubble'; bubble.textContent = idx + 1;
-      const img = document.createElement('img'); img.src = song.image || ''; img.alt = song.album || ''; img.onerror = () => { img.style.display='none'; };
-      const info = document.createElement('div'); info.className = 'prev-info';
-      info.innerHTML = `<div class="prev-name">${song.name}</div><div class="prev-artist">${song.artist}</div>`;
-      const rmBtn = document.createElement('button'); rmBtn.className = 'remove-song-btn'; rmBtn.textContent = '✕'; rmBtn.title = 'Remove';
-      rmBtn.addEventListener('click', () => { basket = basket.filter(s => s.id !== song.id); localStorage.setItem('mixtape_basket', JSON.stringify(basket)); renderPreview(); });
+      const bubble = document.createElement('span');
+      bubble.className = 'track-bubble';
+      bubble.textContent = idx + 1;
+      const img = document.createElement('img');
+      img.src = song.image || '';
+      img.alt = song.album || '';
+      img.onerror = () => { img.style.display = 'none'; };
+      const info = document.createElement('div');
+      info.className = 'prev-info';
+      info.innerHTML = '<div class="prev-name">' + song.name + '</div><div class="prev-artist">' + song.artist + '</div>';
+      const rmBtn = document.createElement('button');
+      rmBtn.className = 'remove-song-btn';
+      rmBtn.textContent = '✕';
+      rmBtn.title = 'Remove';
+      rmBtn.addEventListener('click', () => {
+        basket = basket.filter(s => s.id !== song.id);
+        localStorage.setItem('mixtape_basket', JSON.stringify(basket));
+        renderPreview();
+      });
       li.append(bubble, img, info, rmBtn);
       list.appendChild(li);
     });
@@ -223,7 +323,7 @@
     try {
       const docId = await savePlaylist(name, basket, note);
       const pageBase = 'https://medusas-mixtapes.vercel.app/';
-      const shareUrl = `${pageBase}mixtape.html?id=${docId}`;
+      const shareUrl = pageBase + 'mixtape.html?id=' + docId;
 
       document.getElementById('share-url-out').value = shareUrl;
       document.getElementById('view-tape-link').href  = shareUrl;
@@ -234,7 +334,7 @@
       basket = [];
     } catch (err) {
       console.error(err);
-      showFormError(`Save failed: ${err.message} — check config.js`);
+      showFormError('Save failed: ' + err.message);
       saveBtn.disabled = false;
       saveBtn.innerHTML = 'Save &amp; Get Link';
     }
@@ -242,21 +342,25 @@
 
   function showFormError(msg) {
     const el = document.getElementById('form-error');
-    el.textContent = msg; el.style.display = 'block';
+    el.textContent = msg;
+    el.style.display = 'block';
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   async function doCopyLink() {
     const url = document.getElementById('share-url-out').value;
-    try { await navigator.clipboard.writeText(url); } catch { document.getElementById('share-url-out').select(); document.execCommand('copy'); }
+    try { await navigator.clipboard.writeText(url); }
+    catch { document.getElementById('share-url-out').select(); document.execCommand('copy'); }
     showToast('Link copied!');
   }
 
   function showToast(msg) {
     const el = document.getElementById('toast');
-    el.textContent = msg; el.classList.add('show');
+    el.textContent = msg;
+    el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2500);
   }
 </script>
+
 </body>
 </html>
