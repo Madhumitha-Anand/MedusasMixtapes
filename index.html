@@ -47,22 +47,15 @@
 
     .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
 
-    /* Cassette floats AND tilts like the screenshot */
     .cassette-hero {
-      margin: 0 auto 28px;
-      animation: cassetteFloat 3.5s ease-in-out infinite;
-      filter: drop-shadow(6px 8px 4px rgba(26,16,8,0.45));
+      margin: 0 auto 24px;
+      animation: float 4s ease-in-out infinite;
+      filter: drop-shadow(4px 6px 0px rgba(26,16,8,0.4));
     }
-    @keyframes cassetteFloat {
-      0%   { transform: translateY(0px)   rotate(-8deg); }
-      50%  { transform: translateY(-20px) rotate(-6deg); }
-      100% { transform: translateY(0px)   rotate(-8deg); }
+    @keyframes float {
+      0%,100% { transform: translateY(0) rotate(-1.5deg); }
+      50%      { transform: translateY(-18px) rotate(1.5deg); }
     }
-
-    /* Reel spin animation */
-    .reel-l { transform-origin: 112px 162px; animation: reelSpin 2s linear infinite; }
-    .reel-r { transform-origin: 248px 162px; animation: reelSpin 2s linear infinite; }
-    @keyframes reelSpin { to { transform: rotate(360deg); } }
 
     .footer-strip {
       background: var(--tape-brown);
@@ -88,113 +81,52 @@
 
 <section class="hero">
 
-  <!--
-    Cassette SVG — styled to match the reference image:
-    - Rounded rect body with thick dark border
-    - Bright red label with white ruled lines
-    - Large dark chunky reels with yellow/green hubs
-    - Side notch tabs
-    - Tape window cutout
-    - Slight tilt + float animation
-  -->
-  <svg class="cassette-hero" width="360" height="220" viewBox="0 0 360 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-
-    <!-- Drop shadow layer -->
-    <rect x="14" y="14" width="332" height="196" rx="28" fill="rgba(0,0,0,0.28)"/>
-
-    <!-- Main cassette body — very dark brown like screenshot -->
-    <rect x="4" y="4" width="332" height="196" rx="28"
-      fill="#1E0F07" stroke="#0d0600" stroke-width="4"/>
-
-    <!-- Subtle body highlight at top -->
-    <rect x="4" y="4" width="332" height="50" rx="28" fill="rgba(255,255,255,0.04)"/>
-
-    <!-- === RED LABEL AREA === -->
-    <rect x="28" y="16" width="304" height="110" rx="16"
-      fill="#D91A2A" stroke="#0d0600" stroke-width="2.5"/>
-
-    <!-- Label shine at top -->
-    <rect x="28" y="16" width="304" height="32" rx="16" fill="rgba(255,255,255,0.12)"/>
-
-    <!-- White ruled lines on label (like the reference) -->
-    <rect x="52" y="56"  width="256" height="8"  rx="4" fill="rgba(255,255,255,0.70)"/>
-    <rect x="52" y="74"  width="200" height="6"  rx="3" fill="rgba(255,255,255,0.50)"/>
-    <rect x="52" y="90"  width="230" height="5"  rx="3" fill="rgba(255,255,255,0.38)"/>
-    <rect x="52" y="104" width="170" height="4"  rx="2" fill="rgba(255,255,255,0.28)"/>
-
-    <!-- === LEFT SIDE TAB (notch) === -->
-    <rect x="0" y="86" width="14" height="52" rx="7"
-      fill="#110800" stroke="#0d0600" stroke-width="2"/>
-    <!-- Tab detail line -->
-    <rect x="5" y="96" width="4" height="32" rx="2" fill="rgba(255,255,255,0.08)"/>
-
-    <!-- === RIGHT SIDE TAB === -->
-    <rect x="346" y="86" width="14" height="52" rx="7"
-      fill="#110800" stroke="#0d0600" stroke-width="2"/>
-    <rect x="351" y="96" width="4" height="32" rx="2" fill="rgba(255,255,255,0.08)"/>
-
-    <!-- === TAPE WINDOW CUTOUT === -->
-    <rect x="102" y="138" width="156" height="46" rx="12"
-      fill="#0a0500" stroke="#1a0a00" stroke-width="2"/>
-    <!-- Window inner highlight -->
-    <rect x="104" y="140" width="152" height="12" rx="6" fill="rgba(255,255,255,0.03)"/>
-
-    <!-- === LEFT REEL (animated) === -->
-    <g class="reel-l">
-      <!-- Outer reel ring -->
-      <circle cx="112" cy="162" r="32" fill="#1a0d06" stroke="#0d0600" stroke-width="3"/>
-      <!-- Middle ring -->
-      <circle cx="112" cy="162" r="20" fill="#2a1a0a" stroke="#1a0a00" stroke-width="2"/>
-      <!-- Hub — yellow/green like reference -->
-      <circle cx="112" cy="162" r="11" fill="#C8B820" stroke="#8a7a00" stroke-width="1.5"/>
-      <!-- Center hole -->
-      <circle cx="112" cy="162" r="4"  fill="#0d0600"/>
-      <!-- Spokes -->
-      <line x1="112" y1="145" x2="112" y2="154" stroke="#8a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="101" y1="149" x2="107" y2="156" stroke="#8a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="123" y1="149" x2="117" y2="156" stroke="#8a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="98"  y1="161" x2="107" y2="161" stroke="#8a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="126" y1="161" x2="117" y2="161" stroke="#8a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="101" y1="173" x2="107" y2="166" stroke="#8a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="123" y1="173" x2="117" y2="166" stroke="#8a7a00" stroke-width="2.5" stroke-linecap="round"/>
-    </g>
-
-    <!-- === RIGHT REEL (animated) === -->
-    <g class="reel-r">
-      <circle cx="248" cy="162" r="32" fill="#1a0d06" stroke="#0d0600" stroke-width="3"/>
-      <circle cx="248" cy="162" r="20" fill="#2a1a0a" stroke="#1a0a00" stroke-width="2"/>
-      <!-- Hub — green like reference right reel -->
-      <circle cx="248" cy="162" r="11" fill="#6BB820" stroke="#3a7a00" stroke-width="1.5"/>
-      <circle cx="248" cy="162" r="4"  fill="#0d0600"/>
-      <!-- Spokes -->
-      <line x1="248" y1="145" x2="248" y2="154" stroke="#3a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="237" y1="149" x2="243" y2="156" stroke="#3a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="259" y1="149" x2="253" y2="156" stroke="#3a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="234" y1="161" x2="243" y2="161" stroke="#3a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="262" y1="161" x2="253" y2="161" stroke="#3a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="237" y1="173" x2="243" y2="166" stroke="#3a7a00" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="259" y1="173" x2="253" y2="166" stroke="#3a7a00" stroke-width="2.5" stroke-linecap="round"/>
-    </g>
-
-    <!-- === TAPE PATH between reels === -->
-    <path d="M144 162 Q180 146 216 162"
-      stroke="#2a1500" stroke-width="3" fill="none" stroke-dasharray="6 3"/>
-
-    <!-- === CORNER SCREW HOLES === -->
-    <circle cx="22"  cy="22"  r="7" fill="#110800" stroke="#0d0600" stroke-width="2"/>
-    <circle cx="338" cy="22"  r="7" fill="#110800" stroke="#0d0600" stroke-width="2"/>
-    <circle cx="22"  cy="192" r="7" fill="#110800" stroke="#0d0600" stroke-width="2"/>
-    <circle cx="338" cy="192" r="7" fill="#110800" stroke="#0d0600" stroke-width="2"/>
-    <!-- Screw cross marks -->
-    <line x1="19" y1="22" x2="25" y2="22" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-    <line x1="22" y1="19" x2="22" y2="25" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-    <line x1="335" y1="22" x2="341" y2="22" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-    <line x1="338" y1="19" x2="338" y2="25" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-    <line x1="19" y1="192" x2="25" y2="192" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-    <line x1="22" y1="189" x2="22" y2="195" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-    <line x1="335" y1="192" x2="341" y2="192" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-    <line x1="338" y1="189" x2="338" y2="195" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-
+  <!-- Cassette SVG — original version, no label text -->
+  <svg class="cassette-hero" width="300" height="185" viewBox="0 0 300 185" fill="none">
+    <rect x="10" y="10" width="284" height="168" rx="18" fill="rgba(0,0,0,0.25)"/>
+    <rect x="3" y="3" width="284" height="168" rx="18" fill="#2C1A0E" stroke="#111" stroke-width="3"/>
+    <!-- Red label — expanded to fill symmetrically (x=22 to x=278, width=256) -->
+    <rect x="22" y="13" width="256" height="84" rx="9" fill="#C8102E" stroke="#111" stroke-width="2"/>
+    <defs>
+      <pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#000" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect x="22" y="13" width="256" height="84" rx="9" fill="url(#hatch)" opacity="0.06"/>
+    <rect x="22" y="13" width="256" height="22" rx="9" fill="rgba(255,255,255,0.07)"/>
+    <!-- Ruled lines — centred within label -->
+    <rect x="44" y="28" width="212" height="5" rx="3" fill="rgba(255,255,255,0.5)"/>
+    <rect x="44" y="42" width="160" height="4" rx="2" fill="rgba(255,255,255,0.35)"/>
+    <rect x="44" y="54" width="190" height="3" rx="2" fill="rgba(255,255,255,0.25)"/>
+    <rect x="44" y="65" width="130" height="3" rx="2" fill="rgba(255,255,255,0.18)"/>
+    <!-- Side tabs -->
+    <rect x="0"   y="60" width="9" height="42" rx="4" fill="#1a0c06" stroke="#111" stroke-width="1"/>
+    <rect x="285" y="60" width="9" height="42" rx="4" fill="#1a0c06" stroke="#111" stroke-width="1"/>
+    <!-- Window — centred: body centre=145, window width=110, so x=(145-55)=90 -->
+    <rect x="90" y="107" width="110" height="30" rx="7" fill="#0d0d0d" stroke="#333" stroke-width="1.5"/>
+    <!-- Left reel — centred at cx=78 (equal spacing from sides) -->
+    <circle cx="78"  cy="122" r="19" fill="#2a2a3a" stroke="#444" stroke-width="1.5"/>
+    <circle cx="78"  cy="122" r="11" fill="#3D2B1F" stroke="#444" stroke-width="1.5"/>
+    <circle cx="78"  cy="122" r="6"  fill="#B7E26A" stroke="#555" stroke-width="1"/>
+    <circle cx="78"  cy="122" r="2.5" fill="#111"/>
+    <line x1="78"  y1="111" x2="78"  y2="116" stroke="#666" stroke-width="1.5"/>
+    <line x1="70"  y1="114" x2="74"  y2="118" stroke="#666" stroke-width="1.5"/>
+    <line x1="86"  y1="114" x2="82"  y2="118" stroke="#666" stroke-width="1.5"/>
+    <!-- Right reel — centred at cx=212 (mirror of 78 around 145) -->
+    <circle cx="212" cy="122" r="19" fill="#2a2a3a" stroke="#444" stroke-width="1.5"/>
+    <circle cx="212" cy="122" r="11" fill="#3D2B1F" stroke="#444" stroke-width="1.5"/>
+    <circle cx="212" cy="122" r="6"  fill="#F5D060" stroke="#555" stroke-width="1"/>
+    <circle cx="212" cy="122" r="2.5" fill="#111"/>
+    <line x1="212" y1="111" x2="212" y2="116" stroke="#666" stroke-width="1.5"/>
+    <line x1="204" y1="114" x2="208" y2="118" stroke="#666" stroke-width="1.5"/>
+    <line x1="220" y1="114" x2="216" y2="118" stroke="#666" stroke-width="1.5"/>
+    <!-- Tape path — between reels, centred -->
+    <path d="M97 122 Q145 108 193 122" stroke="#555" stroke-width="2" fill="none" stroke-dasharray="4 2"/>
+    <!-- Screw holes -->
+    <circle cx="15"  cy="15"  r="4" fill="#111" stroke="#333"/>
+    <circle cx="277" cy="15"  r="4" fill="#111" stroke="#333"/>
+    <circle cx="15"  cy="167" r="4" fill="#111" stroke="#333"/>
+    <circle cx="277" cy="167" r="4" fill="#111" stroke="#333"/>
   </svg>
 
   <h1 class="hero-title">MEDUSA'S<br/>MIXTAPES</h1>
@@ -205,7 +137,7 @@
 </section>
 
 <footer class="footer-strip">
-  Made with love by mads &nbsp;|&nbsp;
+  Made with love by mads&nbsp;|&nbsp;
   <a href="https://developer.spotify.com" target="_blank"></a>
 </footer>
 
