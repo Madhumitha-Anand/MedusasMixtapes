@@ -11,21 +11,13 @@
   <style>
     body {
       background-color: #96C045;
-      background-image:
-        repeating-linear-gradient(-45deg, transparent, transparent 32px, rgba(0,0,0,0.015) 32px, rgba(0,0,0,0.015) 33px);
+      background-image: repeating-linear-gradient(-45deg, transparent, transparent 32px, rgba(0,0,0,0.015) 32px, rgba(0,0,0,0.015) 33px);
       padding-bottom: 120px;
     }
 
-    /* ---- Brown music notes floating on green background ---- */
-    .music-notes-field {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      pointer-events: none; overflow: hidden; z-index: 0;
-    }
-    .mnote {
-      position: absolute; opacity: 0; user-select: none;
-      font-size: 1.6rem; color: #3D2B1F;
-      animation: floatNote linear infinite;
-    }
+    /* Brown music notes on green background sides */
+    .music-notes-field { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .mnote { position: absolute; opacity: 0; user-select: none; font-size: 1.6rem; color: #3D2B1F; animation: floatNote linear infinite; }
     @keyframes floatNote {
       0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
       10%  { opacity: 0.35; }
@@ -33,75 +25,37 @@
       100% { opacity: 0; transform: translateY(-100vh) rotate(300deg); }
     }
 
-    /* ---- Layout ---- */
-    .page-wrap {
-      position: relative; z-index: 1;
-      max-width: 740px; margin: 0 auto; padding: 28px 20px 60px;
-    }
+    .page-wrap { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 28px 20px 60px; }
 
-    /* ---- Tape Hero — tight padding, no excess space ---- */
+    /* ---- Tape Hero — snug wrap, minimal space above cassette ---- */
     .tape-hero {
-      background: var(--tape-brown);
-      background-image:
-        repeating-linear-gradient(88deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px),
-        repeating-linear-gradient(2deg, transparent, transparent 80px, rgba(0,0,0,0.04) 80px, rgba(0,0,0,0.04) 81px);
       background-color: var(--tape-brown);
+      background-image: repeating-linear-gradient(88deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px);
       border-radius: 20px; border: 3px solid #111;
       box-shadow: 8px 8px 0 rgba(0,0,0,0.4);
-      /* Tight padding — just enough room */
-      padding: 22px 24px 20px;
+      /* Tight padding — only ~3cm above cassette */
+      padding: 16px 24px 18px;
       text-align: center; margin-bottom: 16px;
       position: relative; overflow: hidden;
+      display: flex; flex-direction: column; align-items: center;
     }
-
-    .vinyl-bg {
-      position: absolute; width: 320px; height: 320px; border-radius: 50%;
-      background: repeating-conic-gradient(#1c1c1c 0deg 8deg, #242424 8deg 16deg);
-      top: 50%; left: 50%; transform: translate(-50%, -50%);
-      opacity: 0.1; animation: vinylSpin 25s linear infinite;
-    }
-    @keyframes vinylSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    /* No vinyl bg — it caused invisible height */
+    .vinyl-bg { display: none; }
     .tape-hero > * { position: relative; z-index: 1; }
 
-    /* ---- Cassette — smaller size to reduce hero height ---- */
-    .cassette-large {
-      display: block; margin: 0 auto 12px;
-      animation: cassetteFloat 5s ease-in-out infinite;
-      filter: drop-shadow(5px 7px 2px rgba(0,0,0,0.5));
-    }
-    @keyframes cassetteFloat {
-      0%,100% { transform: translateY(0) rotate(-1.5deg); }
-      50%      { transform: translateY(-10px) rotate(1.5deg); }
-    }
+    /* Cassette */
+    .cassette-large { display: block; margin: 0 auto 12px; animation: cassetteFloat 5s ease-in-out infinite; filter: drop-shadow(5px 7px 2px rgba(0,0,0,0.5)); }
+    @keyframes cassetteFloat { 0%,100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-10px) rotate(1.5deg); } }
     .cassette-large.playing .reel-left  { animation: reelSpin 1.2s linear infinite; transform-origin: 90px 138px; }
     .cassette-large.playing .reel-right { animation: reelSpin 1.2s linear infinite; transform-origin: 210px 138px; }
     @keyframes reelSpin { to { transform: rotate(360deg); } }
 
-    /* ---- Tape title — Alfa Slab One ---- */
-    .tape-title {
-      font-family: 'Alfa Slab One', serif;
-      font-size: clamp(2rem, 6vw, 3.2rem);
-      color: var(--yellow);
-      letter-spacing: 2px;
-      text-shadow: 3px 3px 0 var(--red);
-      line-height: 1;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-    .tape-meta {
-      color: rgba(245,237,208,0.6); font-size: 0.82rem;
-      font-style: italic; margin-bottom: 10px;
-    }
+    /* Tape title */
+    .tape-title { font-family: 'Alfa Slab One', serif; font-size: clamp(2rem, 6vw, 3.2rem); color: var(--yellow); letter-spacing: 2px; text-shadow: 3px 3px 0 var(--red); line-height: 1; margin-bottom: 8px; text-transform: uppercase; }
+    .tape-meta { color: rgba(245,237,208,0.6); font-size: 0.82rem; font-style: italic; margin-bottom: 10px; }
     .tape-stats { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
-    .stat-pill {
-      background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18);
-      border-radius: 50px; padding: 5px 16px;
-      color: var(--cream); font-size: 0.82rem; font-style: italic;
-    }
-    .stat-pill strong {
-      color: var(--yellow); font-style: normal;
-      font-family: 'Alfa Slab One', serif; font-size: 0.95rem;
-    }
+    .stat-pill { background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18); border-radius: 50px; padding: 5px 16px; color: var(--cream); font-size: 0.82rem; font-style: italic; }
+    .stat-pill strong { color: var(--yellow); font-style: normal; font-family: 'Alfa Slab One', serif; font-size: 0.95rem; }
 
     /* EQ bars */
     .eq-row { display: flex; align-items: flex-end; justify-content: center; gap: 3px; height: 24px; margin-top: 10px; }
@@ -109,7 +63,6 @@
     .eq-bar:nth-child(2n) { background: var(--yellow); animation-delay: 0.12s; }
     .eq-bar:nth-child(3n) { background: var(--red); animation-delay: 0.25s; }
     .eq-bar:nth-child(4n) { background: var(--orange); animation-delay: 0.08s; }
-    .eq-bar:nth-child(5n) { animation-delay: 0.35s; }
     @keyframes eqPulse { from { height: 3px; } to { height: 22px; } }
 
     /* Waveform */
@@ -117,44 +70,25 @@
     .waveform-path { animation: waveScroll 3s linear infinite; }
     @keyframes waveScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-    /* ---- Note card — Alfa Slab One for note text ---- */
+    /* Note card — label Alfa Slab One, content Noto Serif normal */
     .note-card {
       background: #FFF9E6; border: 2.5px solid var(--black);
       border-radius: 14px; padding: 16px 20px; margin-bottom: 14px;
       box-shadow: 5px 5px 0 rgba(0,0,0,0.25); position: relative;
       background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, #e0d5b0 27px, #e0d5b0 28px);
     }
-    .note-card::before {
-      content: ''; position: absolute; left: 44px; top: 0; bottom: 0;
-      width: 2px; background: rgba(200,16,46,0.3);
-    }
-    .note-label {
-      font-family: 'Alfa Slab One', serif; font-size: 0.85rem;
-      letter-spacing: 2px; color: var(--red);
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
-      margin-bottom: 6px; padding-left: 32px;
-    }
-    .note-text {
-      /* Alfa Slab One for the note content */
-      font-family: 'Alfa Slab One', serif;
-      font-size: 0.95rem; color: #2a1a08;
-      line-height: 1.95; padding-left: 32px;
-      min-height: 28px; white-space: pre-wrap;
-      letter-spacing: 0.5px;
-    }
+    .note-card::before { content: ''; position: absolute; left: 44px; top: 0; bottom: 0; width: 2px; background: rgba(200,16,46,0.3); }
+    .note-label { font-family: 'Alfa Slab One', serif; font-size: 0.85rem; letter-spacing: 2px; color: var(--red); text-shadow: 1px 1px 0 rgba(0,0,0,0.15); margin-bottom: 8px; padding-left: 32px; }
+    /* NOTE TEXT — Noto Serif normal (same as tape name input) */
+    .note-text { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; font-size: 1rem; color: #2a1a08; line-height: 1.95; padding-left: 32px; min-height: 28px; white-space: pre-wrap; }
 
-    /* ---- Actions ---- */
+    /* Actions */
     .tape-actions { display: flex; justify-content: center; gap: 12px; margin: 16px 0 20px; flex-wrap: wrap; }
 
-    /* ---- Section heading — Alfa Slab One ---- */
-    .section-heading {
-      font-family: 'Alfa Slab One', serif;
-      font-size: 1.5rem; letter-spacing: 1.5px;
-      color: var(--black); text-shadow: 2px 2px 0 var(--red);
-      margin-bottom: 14px;
-    }
+    /* Section heading */
+    .section-heading { font-family: 'Alfa Slab One', serif; font-size: 1.5rem; letter-spacing: 1.5px; color: var(--black); text-shadow: 2px 2px 0 var(--red); margin-bottom: 14px; }
 
-    /* ---- Track row — Alfa Slab One for track names ---- */
+    /* Track row */
     .track-row {
       display: flex; align-items: center; gap: 12px;
       background: var(--white); border: 2px solid var(--black);
@@ -165,21 +99,11 @@
     }
     .track-row:hover { transform: translate(-3px, -3px); box-shadow: 7px 7px 0 var(--black); }
     .track-row.playing { background: #fff8e6; border-color: var(--red); box-shadow: 4px 4px 0 var(--red); }
-    .track-num {
-      font-family: 'Alfa Slab One', serif; font-size: 1.3rem;
-      color: var(--red); width: 28px; text-align: center; flex-shrink: 0;
-    }
-    .track-row img {
-      width: 52px; height: 52px; border-radius: 8px;
-      border: 2px solid var(--black); object-fit: cover; flex-shrink: 0;
-    }
+    .track-num { font-family: 'Alfa Slab One', serif; font-size: 1.3rem; color: var(--red); width: 28px; text-align: center; flex-shrink: 0; }
+    .track-row img { width: 52px; height: 52px; border-radius: 8px; border: 2px solid var(--black); object-fit: cover; flex-shrink: 0; }
     .track-info { flex: 1; min-width: 0; }
-    .track-name {
-      font-family: 'Alfa Slab One', serif;
-      font-size: 0.88rem; white-space: nowrap;
-      overflow: hidden; text-overflow: ellipsis;
-      letter-spacing: 0.5px;
-    }
+    /* Track name — Noto Serif normal weight */
+    .track-name { font-family: 'Noto Serif', Georgia, serif; font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .track-artist { font-size: 0.8rem; color: #665; font-style: italic; }
     .track-duration { font-size: 0.78rem; color: #999; flex-shrink: 0; font-style: italic; }
 
@@ -194,71 +118,33 @@
     @keyframes barBounce { from { height: 4px; } to { height: 20px; } }
 
     /* Spotify link */
-    .spotify-link {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: #1DB954; color: #fff; border: 2px solid var(--black);
-      border-radius: 50px; padding: 4px 12px; font-size: 0.72rem;
-      font-weight: 700; text-decoration: none; box-shadow: 2px 2px 0 #111;
-      flex-shrink: 0; transition: transform 0.1s; font-style: normal;
-      font-family: 'Alfa Slab One', serif; letter-spacing: 0.5px;
-    }
+    .spotify-link { display: inline-flex; align-items: center; gap: 5px; background: #1DB954; color: #fff; border: 2px solid var(--black); border-radius: 50px; padding: 4px 12px; font-size: 0.72rem; font-weight: 700; text-decoration: none; box-shadow: 2px 2px 0 #111; flex-shrink: 0; transition: transform 0.1s; }
     .spotify-link:hover { transform: translate(-1px,-1px); }
 
-    /* Spotify embed player */
-    .player-wrap {
-      background: var(--tape-brown); border: 3px solid var(--black);
-      border-radius: 16px; padding: 14px; margin-bottom: 20px;
-      box-shadow: 6px 6px 0 rgba(0,0,0,0.35); display: none;
-    }
+    /* Player */
+    .player-wrap { background: var(--tape-brown); border: 3px solid var(--black); border-radius: 16px; padding: 14px; margin-bottom: 20px; box-shadow: 6px 6px 0 rgba(0,0,0,0.35); display: none; }
     .player-wrap.visible { display: block; }
-    .player-label {
-      font-family: 'Alfa Slab One', serif; font-size: 0.9rem;
-      letter-spacing: 2px; color: var(--yellow); margin-bottom: 8px;
-      text-shadow: 1px 1px 0 var(--red);
-    }
+    .player-label { font-family: 'Alfa Slab One', serif; font-size: 0.9rem; letter-spacing: 2px; color: var(--yellow); margin-bottom: 8px; text-shadow: 1px 1px 0 var(--red); }
     .player-wrap iframe { width: 100%; border-radius: 10px; border: none; display: block; }
 
     /* Skeletons */
-    .skeleton {
-      background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.06) 75%);
-      background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 8px;
-    }
+    .skeleton { background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.06) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 8px; }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
     /* Share bar */
-    .share-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: var(--tape-brown); border-top: 3px solid var(--yellow);
-      padding: 10px 20px; display: flex; align-items: center;
-      justify-content: center; gap: 12px; z-index: 50; flex-wrap: wrap;
-    }
-    .share-bar span {
-      color: var(--cream); font-size: 0.85rem; font-style: italic;
-      font-family: 'Alfa Slab One', serif; letter-spacing: 1px;
-    }
-    #share-url-bar {
-      font-family: monospace; font-size: 0.75rem; padding: 6px 12px;
-      border: 1.5px solid #666; border-radius: 8px;
-      background: #1a0c06; color: var(--green); width: 240px; max-width: 38vw;
-    }
+    .share-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--tape-brown); border-top: 3px solid var(--yellow); padding: 10px 20px; display: flex; align-items: center; justify-content: center; gap: 12px; z-index: 50; flex-wrap: wrap; }
+    .share-bar span { color: var(--cream); font-size: 0.85rem; font-style: italic; font-family: 'Alfa Slab One', serif; letter-spacing: 1px; }
+    #share-url-bar { font-family: monospace; font-size: 0.75rem; padding: 6px 12px; border: 1.5px solid #666; border-radius: 8px; background: #1a0c06; color: var(--green); width: 240px; max-width: 38vw; }
 
     /* Error */
     .error-box { text-align: center; padding: 60px 20px; }
 
     /* Accent stripe */
-    .accent-stripe {
-      height: 6px;
-      background: repeating-linear-gradient(90deg,
-        var(--red) 0px, var(--red) 20px,
-        var(--yellow) 20px, var(--yellow) 40px,
-        var(--green-dark) 40px, var(--green-dark) 60px,
-        var(--black) 60px, var(--black) 80px);
-    }
+    .accent-stripe { height: 6px; background: repeating-linear-gradient(90deg, var(--red) 0px, var(--red) 20px, var(--yellow) 20px, var(--yellow) 40px, var(--green-dark) 40px, var(--green-dark) 60px, var(--black) 60px, var(--black) 80px); }
   </style>
 </head>
 <body>
 
-<!-- Brown music notes floating on green background -->
 <div class="music-notes-field" id="notes-field"></div>
 
 <nav class="navbar">
@@ -272,7 +158,6 @@
 
 <div class="page-wrap">
 
-  <!-- Hero -->
   <div id="tape-hero-wrap">
     <div class="tape-hero">
       <div style="width:300px;height:30px;margin:0 auto 12px;" class="skeleton"></div>
@@ -281,26 +166,21 @@
     </div>
   </div>
 
-  <!-- Note card -->
   <div class="note-card" id="note-card" style="display:none;">
     <div class="note-label">A NOTE FROM THE CURATOR</div>
     <div class="note-text" id="note-text"></div>
   </div>
 
-  <!-- Actions -->
   <div class="tape-actions" id="tape-actions" style="display:none;">
     <button class="btn btn-yellow" onclick="copyShareLink()">Copy Link</button>
     <a href="create.html" class="btn btn-red">Make Your Own</a>
   </div>
 
-  <!-- Spotify embed player -->
   <div class="player-wrap" id="player-wrap">
     <div class="player-label">NOW PLAYING</div>
-    <iframe id="spotify-embed" src="" height="80"
-      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    <iframe id="spotify-embed" src="" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
   </div>
 
-  <!-- Track list -->
   <p class="section-heading" id="track-heading" style="display:none;">Track List</p>
   <div id="songs-container">
     <div style="height:78px;margin-bottom:10px;border-radius:14px;" class="skeleton"></div>
@@ -310,7 +190,6 @@
 
 </div>
 
-<!-- Share bar -->
 <div class="share-bar" id="share-bar" style="display:none;">
   <span>Share this tape:</span>
   <input type="text" id="share-url-bar" readonly/>
@@ -324,7 +203,6 @@
 <script src="firebase-db.js"></script>
 
 <script>
-  // formatDuration inlined — no external spotify.js needed
   function formatDuration(ms) {
     const s = Math.floor(ms / 1000);
     return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
@@ -334,27 +212,21 @@
 
   window.addEventListener('DOMContentLoaded', async () => {
     spawnFloatingNotes();
-
     const params = new URLSearchParams(window.location.search);
     const playlistId = params.get('id');
     if (!playlistId) { showError('No playlist ID found in the URL.'); return; }
-
     initFirebase();
     try {
       const playlist = await getPlaylist(playlistId);
       if (!playlist) { showError("We couldn't find that mixtape. The link may be broken or the tape was deleted."); return; }
-
       renderHero(playlist);
       renderNote(playlist.note);
       renderTracks(playlist.songs);
-
       document.getElementById('tape-actions').style.display = 'flex';
       document.getElementById('track-heading').style.display = 'block';
-
       document.getElementById('share-url-bar').value = window.location.href;
       document.getElementById('share-bar').style.display = 'flex';
       document.title = playlist.name.toUpperCase() + " — MEDUSA'S MIXTAPES";
-
     } catch (err) {
       showError('Failed to load: ' + err.message);
       console.error(err);
@@ -365,34 +237,25 @@
     const songs    = playlist.songs || [];
     const totalMs  = songs.reduce((s, x) => s + (x.duration_ms || 0), 0);
     const totalMin = Math.floor(totalMs / 60000);
-
     let dateStr = '';
     if (playlist.createdAt && playlist.createdAt.toDate) {
       dateStr = playlist.createdAt.toDate().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
     }
-
     const labelColors = ['#C8102E','#6B3FA0','#D4547A','#1a4a72','#8B4513'];
     const labelColor  = labelColors[songs.length % labelColors.length];
-
     const heights = [10,18,6,22,12,20,5,24,14,8,20,16,7,22,11];
     const eqBars  = heights.map((h,i) =>
       '<div class="eq-bar" style="height:'+h+'px;background:'+(['#B7E26A','#F5D060','#C8102E','#E07B39'][i%4])+';animation-delay:'+(i*0.07).toFixed(2)+'s;"></div>'
     ).join('');
-
     const wavePath = "M0,12 C8,3 16,21 24,12 C32,3 40,21 48,12 C56,3 64,21 72,12 C80,3 88,21 96,12 C104,3 112,21 120,12 C128,3 136,21 144,12 C152,3 160,21 168,12 C176,3 184,21 192,12 C200,3 208,21 216,12 C224,3 232,21 240,12 C248,3 256,21 264,12 C272,3 280,21 288,12 C296,3 304,21 312,12";
 
-    // Cassette is 300×180 (smaller than before to reduce hero height)
     document.getElementById('tape-hero-wrap').innerHTML = `
       <div class="tape-hero">
         <div class="vinyl-bg"></div>
-
         <svg class="cassette-large" id="cassette-svg" width="300" height="180" viewBox="0 0 300 180" fill="none">
-          <!-- Shadow -->
           <rect x="8" y="8" width="288" height="168" rx="18" fill="rgba(0,0,0,0.3)"/>
-          <!-- Body -->
           <rect x="3" y="3" width="288" height="168" rx="18" fill="#2C1A0E" stroke="#111" stroke-width="3"/>
           <rect x="3" y="3" width="288" height="44" rx="18" fill="rgba(255,255,255,0.04)"/>
-          <!-- Label -->
           <rect x="24" y="14" width="252" height="92" rx="10" fill="${labelColor}" stroke="#111" stroke-width="2"/>
           <defs><pattern id="lhatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="#000" stroke-width="1"/></pattern></defs>
           <rect x="24" y="14" width="252" height="92" rx="10" fill="url(#lhatch)" opacity="0.07"/>
@@ -402,12 +265,9 @@
           <rect x="44" y="68" width="120" height="4" rx="2" fill="rgba(255,255,255,0.35)"/>
           <rect x="44" y="80" width="140" height="3" rx="2" fill="rgba(255,255,255,0.25)"/>
           <rect x="44" y="91" width="85"  height="3" rx="2" fill="rgba(255,255,255,0.18)"/>
-          <!-- Side tabs -->
           <rect x="0" y="72" width="10" height="42" rx="5" fill="#1a0c06" stroke="#111" stroke-width="1.5"/>
           <rect x="290" y="72" width="10" height="42" rx="5" fill="#1a0c06" stroke="#111" stroke-width="1.5"/>
-          <!-- Window -->
           <rect x="88" y="120" width="124" height="36" rx="8" fill="#0d0d0d" stroke="#333" stroke-width="1.5"/>
-          <!-- Left reel -->
           <g class="reel-left">
             <circle cx="90" cy="138" r="23" fill="#2a2a3a" stroke="#444" stroke-width="2"/>
             <circle cx="90" cy="138" r="14" fill="#3D2B1F" stroke="#444" stroke-width="1.5"/>
@@ -417,7 +277,6 @@
             <line x1="81" y1="127" x2="85" y2="133" stroke="#666" stroke-width="1.5"/>
             <line x1="99" y1="127" x2="95" y2="133" stroke="#666" stroke-width="1.5"/>
           </g>
-          <!-- Right reel -->
           <g class="reel-right">
             <circle cx="210" cy="138" r="23" fill="#2a2a3a" stroke="#444" stroke-width="2"/>
             <circle cx="210" cy="138" r="14" fill="#3D2B1F" stroke="#444" stroke-width="1.5"/>
@@ -427,32 +286,25 @@
             <line x1="201" y1="127" x2="205" y2="133" stroke="#666" stroke-width="1.5"/>
             <line x1="219" y1="127" x2="215" y2="133" stroke="#666" stroke-width="1.5"/>
           </g>
-          <!-- Tape path -->
           <path d="M113 138 Q150 122 187 138" stroke="#444" stroke-width="2" fill="none" stroke-dasharray="5 3"/>
-          <!-- Screw holes -->
           <circle cx="16" cy="16" r="5" fill="#111" stroke="#333" stroke-width="1.5"/>
           <circle cx="284" cy="16" r="5" fill="#111" stroke="#333" stroke-width="1.5"/>
           <circle cx="16" cy="164" r="5" fill="#111" stroke="#333" stroke-width="1.5"/>
           <circle cx="284" cy="164" r="5" fill="#111" stroke="#333" stroke-width="1.5"/>
-          <!-- SIDE A stamp -->
           <rect x="112" y="160" width="76" height="13" rx="3" fill="rgba(255,255,255,0.05)" stroke="#333" stroke-width="1"/>
           <text x="150" y="170" text-anchor="middle" font-family="Noto Serif,serif" font-size="6" fill="rgba(255,255,255,0.3)" letter-spacing="1">SIDE A</text>
         </svg>
 
         <h1 class="tape-title">${escapeHtml(playlist.name)}</h1>
         ${dateStr ? '<p class="tape-meta">Curated on ' + dateStr + '</p>' : ''}
-
         <div class="tape-stats">
           <div class="stat-pill"><strong>${songs.length}</strong> tracks</div>
           ${totalMin > 0 ? '<div class="stat-pill"><strong>' + totalMin + '</strong> min</div>' : ''}
         </div>
-
         <div class="eq-row">${eqBars}</div>
-
         <div class="waveform-wrap">
           <svg width="200%" height="24" viewBox="0 0 600 24">
-            <path class="waveform-path" d="${wavePath} ${wavePath}"
-              stroke="rgba(183,226,106,0.7)" stroke-width="2" fill="none"/>
+            <path class="waveform-path" d="${wavePath} ${wavePath}" stroke="rgba(183,226,106,0.7)" stroke-width="2" fill="none"/>
           </svg>
         </div>
       </div>`;
@@ -479,10 +331,7 @@
         '<div class="playing-bars"><div class="bar" style="height:8px"></div><div class="bar" style="height:16px"></div><div class="bar" style="height:6px"></div><div class="bar" style="height:20px"></div></div>' +
         '<span class="track-num">' + (index + 1) + '</span>' +
         '<img src="' + (song.image || '') + '" alt="" onerror="this.style.display=\'none\'"/>' +
-        '<div class="track-info">' +
-          '<div class="track-name">' + escapeHtml(song.name) + '</div>' +
-          '<div class="track-artist">' + escapeHtml(song.artist) + '</div>' +
-        '</div>' +
+        '<div class="track-info"><div class="track-name">' + escapeHtml(song.name) + '</div><div class="track-artist">' + escapeHtml(song.artist) + '</div></div>' +
         (song.duration_ms ? '<span class="track-duration">' + formatDuration(song.duration_ms) + '</span>' : '') +
         (song.url ? '<a class="spotify-link" href="' + song.url + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">▶ Open</a>' : '');
       div.addEventListener('click', () => playTrack(song, div));
@@ -496,8 +345,7 @@
     currentlyPlaying = song.id;
     const cassette = document.getElementById('cassette-svg');
     if (cassette) cassette.classList.add('playing');
-    document.getElementById('spotify-embed').src =
-      'https://open.spotify.com/embed/track/' + song.id + '?utm_source=generator&theme=0';
+    document.getElementById('spotify-embed').src = 'https://open.spotify.com/embed/track/' + song.id + '?utm_source=generator&theme=0';
     const pw = document.getElementById('player-wrap');
     pw.classList.add('visible');
     pw.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -530,24 +378,19 @@
 
   function escapeHtml(str) {
     if (!str) return '';
-    return String(str)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
-  // Brown music notes floating on the green background
   function spawnFloatingNotes() {
     const field   = document.getElementById('notes-field');
-    // Only outside the center content area — left and right sides
     const symbols = ['♩','♪','♫','♬','𝄞'];
     for (let i = 0; i < 24; i++) {
       const el = document.createElement('div');
       el.className = 'mnote';
       el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-      // Bias position to left <20% or right >80% of screen
       const side = Math.random() < 0.5;
-      el.style.left   = side ? (Math.random() * 18) + '%' : (82 + Math.random() * 16) + '%';
-      el.style.bottom = -(Math.random() * 15 + 5) + '%';
+      el.style.left     = side ? (Math.random() * 18) + '%' : (82 + Math.random() * 16) + '%';
+      el.style.bottom   = -(Math.random() * 15 + 5) + '%';
       el.style.fontSize = (Math.random() * 1.2 + 0.9) + 'rem';
       el.style.opacity  = '0';
       const dur = Math.random() * 14 + 10;
@@ -557,6 +400,5 @@
     }
   }
 </script>
-
 </body>
 </html>
